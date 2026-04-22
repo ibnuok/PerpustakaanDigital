@@ -5,61 +5,95 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\User;
-use App\Models\Alat;
+use App\Models\Buku;
 
 class PeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $peminjaman = Peminjaman::with(['user','alat'])->get();
+        $query = Peminjaman::with(['user', 'buku', 'approvedBy'])->latest();
+
+        if ($request->filled('search')) {
+            $search = (string) $request->string('search');
+            $query->where(function ($outer) use ($search) {
+                $outer->whereHas('buku', function ($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                        ->orWhere('isbn', 'like', "%{$search}%");
+                })->orWhereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->date_to);
+        }
+
+        $peminjamans = $query->paginate(12)->withQueryString();
 
         $totalPeminjaman = Peminjaman::count();
-        $dipinjam = Peminjaman::where('status','dipinjam')->count();
-        $dikembalikan = Peminjaman::where('status','dikembalikan')->count();
-        $userMeminjam = Peminjaman::distinct('user_id')->count('user_id');
+        $pending = Peminjaman::where('status', 'pending')->count();
+        $approved = Peminjaman::where('status', 'approved')->count();
+        $returned = Peminjaman::where('status', 'returned')->count();
+
+        $users = User::orderBy('name')->get();
 
         return view('admin.peminjaman.index', compact(
-            'peminjaman',
+            'peminjamans',
             'totalPeminjaman',
-            'dipinjam',
-            'dikembalikan',
-            'userMeminjam'
+            'pending',
+            'approved',
+            'returned',
+            'users'
         ));
     }
 
     public function create()
     {
-        $users = User::where('role', 'user')->get();
-        $alat = Alat::all();
+        $users = User::orderBy('name')->get();
+        $bukus = Buku::where('stok', '>', 0)->orderBy('judul')->get();
 
-        return view('admin.peminjaman.create', compact('users', 'alat'));
+        return view('admin.peminjaman.create', compact('users', 'bukus'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'alat_id' => 'required|exists:alats,id',
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required|in:dipinjam,dikembalikan',
+            'buku_id' => 'required|exists:bukus,id',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_pinjam' => 'required|date|after_or_equal:today',
+            'tanggal_kembali' => 'required|date|after:tanggal_pinjam',
         ]);
 
-        $peminjaman = Peminjaman::create([
-            'user_id' => $request->user_id,
-            'alat_id' => $request->alat_id,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali' => $request->tanggal_kembali,
-            'status' => $request->status,
-        ]);
+        $buku = Buku::findOrFail($validated['buku_id']);
 
-        // Kurangi stok jika status langsung dipinjam
-        if ($request->status === 'dipinjam') {
-            $peminjaman->alat->decrement('stok');
+        if ((int) $validated['jumlah'] > $buku->stok) {
+            return back()
+                ->withErrors(['jumlah' => 'Stok buku tidak mencukupi. Stok tersedia saat ini: ' . $buku->stok . '.'])
+                ->withInput();
         }
 
+        Peminjaman::create([
+            ...$validated,
+            'status' => 'pending',
+        ]);
+
         return redirect()->route('admin.peminjaman.index')
-            ->with('success', 'Data peminjaman berhasil ditambahkan');
+            ->with('success', 'Peminjaman berhasil dibuat dan menunggu persetujuan!');
     }
 
     public function show(Peminjaman $peminjaman)
@@ -69,66 +103,91 @@ class PeminjamanController extends Controller
 
     public function edit(Peminjaman $peminjaman)
     {
-        $users = User::where('role', 'user')->get();
-        $alat = Alat::all();
+        if ($peminjaman->status !== 'pending') {
+            return redirect()->back()->with('error', 'Hanya transaksi yang masih menunggu yang dapat diedit.');
+        }
 
-        return view('admin.peminjaman.edit', compact('peminjaman', 'users', 'alat'));
+        $users = User::orderBy('name')->get();
+        $bukus = Buku::orderBy('judul')->get();
+
+        return view('admin.peminjaman.edit', compact('peminjaman', 'users', 'bukus'));
     }
 
     public function update(Request $request, Peminjaman $peminjaman)
     {
-        $request->validate([
+        if ($peminjaman->status !== 'pending') {
+            return redirect()->back()->with('error', 'Hanya peminjaman pending yang dapat diedit!');
+        }
+
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'alat_id' => 'required|exists:alats,id',
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required|in:dipinjam,dikembalikan',
+            'buku_id' => 'required|exists:bukus,id',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_pinjam' => 'required|date|after_or_equal:today',
+            'tanggal_kembali' => 'required|date|after:tanggal_pinjam',
         ]);
 
-        $oldStatus = $peminjaman->status;
-        $oldAlatId = $peminjaman->alat_id;
-        $newStatus = $request->status;
-        $newAlatId = $request->alat_id;
+        $buku = Buku::findOrFail($validated['buku_id']);
 
-        // Handle perubahan status
-        if ($oldStatus !== 'dipinjam' && $newStatus === 'dipinjam') {
-            // Jika berubah dari non-dipinjam ke dipinjam, kurangi stok alat
-            $peminjaman->alat->decrement('stok');
-        } elseif ($oldStatus === 'dipinjam' && $newStatus !== 'dipinjam') {
-            // Jika berubah dari dipinjam ke non-dipinjam, naikkan stok alat
-            $peminjaman->alat->increment('stok');
+        if ((int) $validated['jumlah'] > $buku->stok) {
+            return back()
+                ->withErrors(['jumlah' => 'Stok buku tidak mencukupi.'])
+                ->withInput();
         }
 
-        // Handle perubahan alat pada status dipinjam
-        if ($oldAlatId !== $newAlatId && $oldStatus === 'dipinjam') {
-            // Naikkan stok alat lama
-            Alat::find($oldAlatId)->increment('stok');
-            // Kurangi stok alat baru
-            Alat::find($newAlatId)->decrement('stok');
-        }
-
-        $peminjaman->update([
-            'user_id' => $request->user_id,
-            'alat_id' => $request->alat_id,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali' => $request->tanggal_kembali,
-            'status' => $request->status,
-        ]);
+        $peminjaman->update($validated);
 
         return redirect()->route('admin.peminjaman.index')
-            ->with('success', 'Data peminjaman berhasil diperbarui');
+            ->with('success', 'Peminjaman berhasil diupdate!');
     }
 
     public function destroy(Peminjaman $peminjaman)
     {
-        // Kembalikan stok jika peminjaman sedang dipinjam
-        if ($peminjaman->status === 'dipinjam') {
-            $peminjaman->alat->increment('stok');
+        if ($peminjaman->status === 'approved') {
+            $peminjaman->buku->increment('stok', $peminjaman->jumlah);
         }
 
         $peminjaman->delete();
+        return redirect()->route('admin.peminjaman.index')
+            ->with('success', 'Peminjaman berhasil dihapus!');
+    }
+
+    public function approve(Peminjaman $peminjaman)
+    {
+        if ($peminjaman->status !== 'pending') {
+            return redirect()->back()->with('error', 'Peminjaman ini sudah diproses!');
+        }
+
+        $buku = $peminjaman->buku;
+        if ($buku->stok < $peminjaman->jumlah) {
+            return redirect()->back()->with('error', 'Stok buku tidak mencukupi!');
+        }
+
+        $buku->decrement('stok', $peminjaman->jumlah);
+        $peminjaman->update([
+            'status' => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+        ]);
 
         return redirect()->route('admin.peminjaman.index')
-            ->with('success', 'Data peminjaman berhasil dihapus');
+            ->with('success', 'Peminjaman disetujui!');
+    }
+
+    public function markReturned(Peminjaman $peminjaman)
+    {
+        if ($peminjaman->status !== 'approved') {
+            return redirect()->back()->with('error', 'Hanya peminjaman yang disetujui yang dapat dikembalikan!');
+        }
+
+        $buku = $peminjaman->buku;
+        $buku->increment('stok', $peminjaman->jumlah);
+
+        $peminjaman->update([
+            'status' => 'returned',
+        ]);
+
+        return redirect()->route('admin.peminjaman.index')
+            ->with('success', 'Peminjaman berhasil ditandai sebagai dikembalikan!');
     }
 }

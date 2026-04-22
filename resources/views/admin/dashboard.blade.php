@@ -1,42 +1,109 @@
-@extends('admin.layout')
+@extends('layouts.portal')
+
+@section('title', 'Dashboard Admin')
+@section('page_heading', 'Dashboard Admin')
+@section('page_description', 'Ringkasan aktivitas perpustakaan, koleksi buku, anggota, dan transaksi terbaru dalam tampilan modern.')
+
+@section('page_actions')
+    <a href="{{ route('admin.buku.create') }}" class="btn-secondary">Tambah Buku</a>
+    <a href="{{ route('admin.peminjaman.create') }}" class="btn-primary">Buat Transaksi</a>
+@endsection
 
 @section('content')
-
-<!-- Header -->
-<div class="bg-blue-950/30 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-6 shadow-lg mb-6">
-    <h1 class="text-3xl font-bold text-indigo-300">Dashboard Admin</h1>
-    <p class="text-indigo-200 mt-1">Selamat datang, {{ Auth::user()->name }}</p>
-</div>
-
-<!-- Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-    <a href="{{ route('admin.users.index') }}" class="bg-gradient-to-br from-indigo-600/40 to-indigo-800/40 backdrop-blur-sm border border-indigo-500/50 p-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition">
-        <h3 class="text-xl font-bold text-indigo-300">👥 User</h3>
-        <p class="text-indigo-200 mt-2">Kelola users sistem</p>
-    </a>
-
-    <a href="{{ route('admin.alat.index') }}" class="bg-gradient-to-br from-emerald-600/40 to-emerald-800/40 backdrop-blur-sm border border-emerald-500/50 p-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition">
-        <h3 class="text-xl font-bold text-emerald-300">💻 Alat</h3>
-        <p class="text-emerald-200 mt-2">Kelola inventaris alat</p>
-    </a>
-
-    <a href="{{ route('admin.kategori.index') }}" class="bg-gradient-to-br from-yellow-600/40 to-yellow-800/40 backdrop-blur-sm border border-yellow-500/50 p-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition">
-        <h3 class="text-xl font-bold text-yellow-300">📂 Kategori</h3>
-        <p class="text-yellow-200 mt-2">Kelola kategori alat</p>
-    </a>
-
-</div>
-
-<!-- Info Section -->
-<div class="bg-blue-950/30 backdrop-blur-sm border border-indigo-500/30 mt-8 rounded-xl shadow-lg p-6">
-    <h2 class="text-xl font-bold text-indigo-300 mb-4">ℹ️ Informasi Admin</h2>
-    <div class="text-indigo-200 space-y-2">
-        <p>• Admin bertanggung jawab untuk mengelola <strong>User</strong>, <strong>Alat</strong>, dan <strong>Kategori</strong></p>
-        <p>• <strong>Kategori</strong> adalah tipe/jenis alat (contoh: Laptop, Proyektor)</p>
-        <p>• <strong>Alat</strong> adalah spesifik merek/model alat (contoh: Dell Laptop, HP Laptop, Epson Proyektor)</p>
-        <p>• Data peminjaman yang sudah disetujui petugas akan otomatis tampil di laporan</p>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Total Stok Buku</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalBuku }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Total Judul</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalJudul }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Anggota</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalAnggota }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Admin</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalAdmin }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Transaksi Aktif</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $peminjamanAktif }}</p>
+        </div>
     </div>
-</div>
 
+    <div class="section-grid mt-8">
+        <div class="table-wrap">
+            <div class="table-head">
+                <h2 class="text-lg font-bold text-slate-900">Transaksi Terbaru</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-stone-50 text-left text-stone-500">
+                        <tr>
+                            <th class="px-6 py-4">Peminjam</th>
+                            <th class="px-6 py-4">Buku</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-stone-200">
+                        @forelse ($peminjamanTerbaru as $item)
+                            <tr class="bg-white">
+                                <td class="px-6 py-4 font-medium text-slate-900">{{ $item->user->name }}</td>
+                                <td class="px-6 py-4">{{ $item->buku->judul }}</td>
+                                <td class="px-6 py-4">{!! $item->status_badge !!}</td>
+                                <td class="px-6 py-4 text-stone-500">{{ $item->tanggal_pinjam->format('d M Y') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-stone-500">Belum ada transaksi.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="soft-panel p-6">
+                <h2 class="text-lg font-bold text-slate-900">Statistik Status</h2>
+                <div class="mt-4 space-y-4 text-sm">
+                    <div class="info-card" style="padding: 1rem 1.2rem;">
+                        <div class="flex items-center justify-between">
+                            <span>Menunggu</span>
+                            <strong>{{ $statistikPerStatus['pending'] }}</strong>
+                        </div>
+                    </div>
+                    <div class="info-card" style="padding: 1rem 1.2rem;">
+                        <div class="flex items-center justify-between">
+                            <span>Dipinjam</span>
+                            <strong>{{ $statistikPerStatus['approved'] }}</strong>
+                        </div>
+                    </div>
+                    <div class="info-card" style="padding: 1rem 1.2rem;">
+                        <div class="flex items-center justify-between">
+                            <span>Dikembalikan</span>
+                            <strong>{{ $statistikPerStatus['returned'] }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soft-panel p-6">
+                <h2 class="text-lg font-bold text-slate-900">Buku Terpopuler</h2>
+                <div class="mt-4 space-y-4">
+                    @forelse ($bukuTerlaris as $buku)
+                        <div class="info-card">
+                            <p class="font-semibold text-slate-900">{{ $buku->judul }}</p>
+                            <p class="mt-1 text-sm text-stone-500">{{ $buku->penulis }} - {{ $buku->peminjamans_count }} transaksi</p>
+                        </div>
+                    @empty
+                        <p class="text-sm text-stone-500">Belum ada data buku terlaris.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

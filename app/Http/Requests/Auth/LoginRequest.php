@@ -21,7 +21,6 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'string', 'in:admin,petugas,user'],
         ];
     }
 
@@ -34,17 +33,6 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
-            ]);
-        }
-
-        // Verify that the logged-in user has the selected role
-        $user = Auth::user();
-        if ($user->role !== $this->input('role')) {
-            Auth::logout();
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'role' => __('Role tidak sesuai dengan akun ini'),
             ]);
         }
 

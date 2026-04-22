@@ -47,8 +47,28 @@ class User extends Authenticatable
         ];
     }
 
-    public function peminjaman()
+    public function peminjamans()
     {
-        return $this->hasMany(\App\Models\Peminjaman::class);
+        return $this->hasMany(Peminjaman::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
+
+    public function roleLabel(): string
+    {
+        return $this->role === 'admin' ? 'Admin' : 'Anggota';
+    }
+
+    public function totalPeminjamanAktif()
+    {
+        return $this->peminjamans()->whereIn('status', ['pending', 'approved'])->count();
     }
 }

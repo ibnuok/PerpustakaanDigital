@@ -1,147 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Sistem Peminjaman Laptop - SMKN 1 Ciomas</title>
-        @vite('resources/css/app.css')
-    </head>
-    <body class="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 min-h-screen">
-        
-        <!-- Navbar -->
-        <nav class="bg-black/30 backdrop-blur-md border-b border-white/10">
-            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="bg-indigo-500 rounded-lg p-2">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                    </div>
-                    <h1 class="text-2xl font-bold text-white">Sistem Peminjaman Laptop</h1>
-                </div>
-                <div class="flex gap-3">
-                    <a href="{{ route('login') }}" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
-                        Login
-                    </a>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Perpustakaan Digital Sekolah</title>
+    <link rel="stylesheet" href="{{ asset('css/app-fallback.css') }}">
+    @include('partials.vite')
+</head>
+<body class="page-shell">
+    <div class="site-shell">
+        <header class="site-topbar">
+            <div class="brand">
+                <span class="brand-badge">PD</span>
+                <div>
+                    <div class="text-xs font-semibold uppercase" style="color: var(--muted); letter-spacing: 0.22em;">Perpustakaan Sekolah</div>
+                    <div class="text-lg font-bold">Perpustakaan Digital</div>
                 </div>
             </div>
-        </nav>
+            <nav class="nav-pills">
+                <a href="#cara-pakai" class="nav-pill">Cara Pakai</a>
+                <a href="#layanan" class="nav-pill">Layanan</a>
+                <a href="#manfaat" class="nav-pill">Manfaat</a>
+            </nav>
+            <div class="nav-pills">
+                <a href="{{ route('login') }}" class="btn-secondary">Masuk</a>
+                <a href="{{ route('register') }}" class="btn-primary">Daftar</a>
+            </div>
+        </header>
 
-        <!-- Hero Section -->
-        <section class="min-h-screen flex items-center justify-center px-6 py-20">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-5xl md:text-6xl font-bold text-white mb-6">Kelola Peminjaman Laptop dengan Mudah</h2>
-                <p class="text-xl text-indigo-200 mb-12">Platform terpadu untuk mengelola peminjaman laptop di SMKN 1 Ciomas</p>
-                
-                <div class="grid md:grid-cols-3 gap-6 mb-12">
-                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8">
-                        <div class="bg-blue-500/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 010 4m0-4a2 2 0 100 4m0-4a2 2 0 010 4M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Peminjaman Alat</h3>
-                        <p class="text-indigo-200 text-sm">Kelola semua peminjaman, alat, dan user dalam satu dashboard</p>
-                    </div>
-
-                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8">
-                        <div class="bg-purple-500/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Petugas</h3>
-                        <p class="text-indigo-200 text-sm">Setujui peminjaman, pantau pengembalian, dan buat laporan</p>
-                    </div>
-
-                    <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8">
-                        <div class="bg-green-500/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-white mb-2">User</h3>
-                        <p class="text-indigo-200 text-sm">Lihat alat tersedia dan ajukan peminjaman dengan mudah</p>
-                    </div>
-                </div>
-
-                <a href="{{ route('login') }}" class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg transition transform hover:scale-105">
-                    Mulai Sekarang
-                </a>
+        <section class="hero-panel mt-6">
+            <span class="hero-chip">Website Perpustakaan Digital</span>
+            <h1 class="mt-4 text-5xl font-bold tracking-tight">Kelola buku, anggota, dan peminjaman dalam tampilan yang modern dan nyaman dilihat.</h1>
+            <p class="mt-4 max-w-3xl leading-8" style="color: rgba(255,255,255,0.88);">
+                Sistem ini membantu admin dan anggota menjalankan proses perpustakaan sekolah dari pencarian buku sampai pengembalian dengan alur yang jelas.
+            </p>
+            <div class="page-actions mt-5">
+                <a href="{{ route('register') }}" class="btn-secondary">Buat Akun</a>
+                <a href="{{ route('login') }}" class="btn-primary">Masuk Sekarang</a>
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section class="py-20 px-6 bg-black/50">
-            <div class="max-w-6xl mx-auto">
-                <h3 class="text-4xl font-bold text-white mb-12 text-center">Fitur Unggulan</h3>
-                
-                <div class="grid md:grid-cols-2 gap-12">
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold text-white">Manajemen Alat Realtime</h4>
-                            <p class="text-indigo-200 mt-2">Pantau stok dan kondisi alat secara realtime</p>
-                        </div>
-                    </div>
+        <section id="cara-pakai" class="feature-grid mt-6">
+            <article class="info-card">
+                <div class="text-sm font-semibold" style="color: var(--accent);">Langkah 1</div>
+                <h3 class="mt-3 text-xl font-bold">Daftar Sesuai Kebutuhan</h3>
+                <p class="mt-3 text-sm leading-7" style="color: var(--muted);">Pilih role saat pendaftaran. Setelah itu sistem akan menyimpan akses sesuai akun Anda.</p>
+            </article>
+            <article class="info-card">
+                <div class="text-sm font-semibold" style="color: var(--accent);">Langkah 2</div>
+                <h3 class="mt-3 text-xl font-bold">Login Tanpa Pilih Role Lagi</h3>
+                <p class="mt-3 text-sm leading-7" style="color: var(--muted);">Cukup masukkan email dan password, lalu sistem otomatis mengarahkan Anda ke halaman yang sesuai.</p>
+            </article>
+            <article class="info-card">
+                <div class="text-sm font-semibold" style="color: var(--accent);">Langkah 3</div>
+                <h3 class="mt-3 text-xl font-bold">Kelola dan Pantau Transaksi</h3>
+                <p class="mt-3 text-sm leading-7" style="color: var(--muted);">Admin dapat mengelola data, sedangkan anggota bisa mencari buku, meminjam, dan mengembalikan.</p>
+            </article>
+        </section>
 
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold text-white">Sistem Approval Mudah</h4>
-                            <p class="text-indigo-200 mt-2">Petugas dapat menyetujui atau menolak dengan cepat</p>
-                        </div>
+        <section id="layanan" class="grid-two mt-6">
+            <div class="hero-panel" style="min-height: 320px;">
+                <span class="hero-chip">Layanan Utama</span>
+                <h2 class="mt-4 text-4xl font-bold tracking-tight">Katalog buku digital dengan cover, pencarian, dan filter yang lebih menarik.</h2>
+                <p class="mt-4 max-w-2xl leading-8" style="color: rgba(255,255,255,0.88);">
+                    Katalog didesain lebih visual agar anggota lebih mudah menemukan buku yang ingin dipinjam.
+                </p>
+            </div>
+            <div class="soft-panel p-6">
+                <div class="space-y-4">
+                    <div class="info-card">
+                        <h3 class="text-lg font-bold">Admin</h3>
+                        <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Kelola buku, kategori, anggota, dan semua transaksi peminjaman.</p>
                     </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold text-white">Laporan Terperinci</h4>
-                            <p class="text-indigo-200 mt-2">Cetak laporan peminjaman kapan saja</p>
-                        </div>
+                    <div class="info-card">
+                        <h3 class="text-lg font-bold">Anggota</h3>
+                        <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Lihat katalog, pilih buku, ajukan pinjaman, dan pantau status transaksi.</p>
                     </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold text-white">Interface Intuitif</h4>
-                            <p class="text-indigo-200 mt-2">Desain user-friendly yang mudah dipelajari</p>
-                        </div>
+                    <div class="info-card">
+                        <h3 class="text-lg font-bold">Riwayat</h3>
+                        <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Semua aktivitas dicatat dalam sistem sehingga mudah dilacak kapan saja.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="bg-black/70 border-t border-white/10 py-6 px-6">
-            <div class="max-w-6xl mx-auto text-center text-indigo-200">
-                <p>&copy; 2026 SMKN 1 Ciomas - Sistem Peminjaman Laptop. Semua hak dilindungi.</p>
+        <section id="manfaat" class="surface page-block mt-6">
+            <div class="text-center">
+                <div class="text-sm font-semibold uppercase" style="color: var(--accent); letter-spacing: 0.18em;">Manfaat Sistem</div>
+                <h2 class="mt-3 text-3xl font-bold">Semua kebutuhan perpustakaan sekolah dalam satu tempat.</h2>
+                <p class="mt-3 max-w-3xl mx-auto leading-8" style="color: var(--muted);">
+                    Tampilan disusun lebih modern seperti referensi: terang, rapi, penuh ruang kosong yang nyaman, serta mudah dipakai di desktop maupun mobile.
+                </p>
             </div>
+            <div class="feature-grid mt-6">
+                <article class="info-card">
+                    <h3 class="text-lg font-bold">Dashboard Ringkas</h3>
+                    <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Statistik dan akses menu utama bisa dipahami dengan cepat.</p>
+                </article>
+                <article class="info-card">
+                    <h3 class="text-lg font-bold">Form Lebih Nyaman</h3>
+                    <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Input, filter, dan tindakan dibuat lebih jelas dan konsisten.</p>
+                </article>
+                <article class="info-card">
+                    <h3 class="text-lg font-bold">Visual Seragam</h3>
+                    <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Dari halaman awal sampai halaman admin/user, semuanya memakai gaya yang sama.</p>
+                </article>
+            </div>
+        </section>
+
+        <footer class="footer-bar">
+            Perpustakaan Digital Sekolah - tampilan modern untuk admin dan anggota.
         </footer>
-
-    </body>
+    </div>
+</body>
 </html>

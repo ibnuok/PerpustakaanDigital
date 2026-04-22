@@ -14,13 +14,35 @@ class KategoriSeeder extends Seeder
     public function run(): void
     {
         Kategori::firstOrCreate(
-            ['nama_kategori' => 'Laptop'],
-            ['nama_kategori' => 'Laptop']
+            ['nama_kategori' => 'Novel'],
+            [
+                'nama_kategori' => 'Novel',
+                'deskripsi' => 'Koleksi novel fiksi untuk literasi siswa.',
+            ]
         );
 
         Kategori::firstOrCreate(
-            ['nama_kategori' => 'Proyektor'],
-            ['nama_kategori' => 'Proyektor']
+            ['nama_kategori' => 'Sains'],
+            [
+                'nama_kategori' => 'Sains',
+                'deskripsi' => 'Buku pelajaran dan referensi ilmu pengetahuan.',
+            ]
+        );
+
+        Kategori::firstOrCreate(
+            ['nama_kategori' => 'Teknologi'],
+            [
+                'nama_kategori' => 'Teknologi',
+                'deskripsi' => 'Materi komputer, desain, dan teknologi informasi.',
+            ]
+        );
+
+        Kategori::firstOrCreate(
+            ['nama_kategori' => 'Sejarah'],
+            [
+                'nama_kategori' => 'Sejarah',
+                'deskripsi' => 'Buku sejarah nasional dan dunia.',
+            ]
         );
     }
 }

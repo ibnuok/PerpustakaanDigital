@@ -1,102 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Akun Peminjam - Sistem Peminjaman Laptop</title>
-    @vite('resources/css/app.css')
+    <title>Daftar - Perpustakaan Digital Sekolah</title>
+    <link rel="stylesheet" href="{{ asset('css/app-fallback.css') }}">
+    @include('partials.vite')
 </head>
-<body class="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 min-h-screen flex items-center justify-center">
+<body class="page-shell">
+    <div class="auth-shell">
+        <div class="surface auth-card">
+            <a href="/" class="text-sm font-semibold" style="color: var(--muted);">Kembali ke beranda</a>
+            <h1 class="mt-4 text-3xl font-bold">Buat akun baru</h1>
+            <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Pilih role saat daftar, lalu saat login nanti sistem langsung menyesuaikan akses Anda.</p>
 
-    <div class="w-full max-w-md px-4">
-        <!-- Header Logo -->
-        <div class="text-center mb-8">
-            <div class="inline-block bg-white/10 backdrop-blur-md rounded-full p-4 mb-4">
-                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                </svg>
-            </div>
-            <h1 class="text-3xl font-bold text-white">Daftar Peminjam</h1>
-            <p class="text-indigo-200 mt-2">Sistem Peminjaman Laptop SMKN 1 Ciomas</p>
-        </div>
-
-        <!-- Register Card -->
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
-            
             @if (session('status'))
-                <div class="mb-4 p-4 bg-green-500/20 text-green-200 rounded-lg">
+                <div class="mt-6 soft-panel p-4" style="background: var(--success-bg); color: var(--success);">
                     {{ session('status') }}
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('register') }}" class="space-y-5">
+            <form method="POST" action="{{ route('register') }}" class="mt-6 space-y-4">
                 @csrf
 
-                <!-- Name -->
                 <div>
-                    <label for="name" class="block text-sm font-medium text-indigo-100 mb-2">Nama Lengkap</label>
-                    <input id="name" class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition @error('name') border-red-500 @enderror" 
-                        type="text" name="name" value="{{ old('name') }}" required autofocus>
-                    @error('name')
-                        <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                    <label for="name" class="field-label">Nama Lengkap</label>
+                    <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus class="field-input @error('name') border-rose-400 @enderror" placeholder="Masukkan nama lengkap">
+                    @error('name')<p class="mt-2 text-sm" style="color: var(--danger);">{{ $message }}</p>@enderror
                 </div>
 
-                <!-- Email -->
                 <div>
-                    <label for="email" class="block text-sm font-medium text-indigo-100 mb-2">Email Address</label>
-                    <input id="email" class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition @error('email') border-red-500 @enderror" 
-                        type="email" name="email" value="{{ old('email') }}" required>
-                    @error('email')
-                        <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                    <label for="email" class="field-label">Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required class="field-input @error('email') border-rose-400 @enderror" placeholder="nama@email.com">
+                    @error('email')<p class="mt-2 text-sm" style="color: var(--danger);">{{ $message }}</p>@enderror
                 </div>
 
-                <!-- Password -->
                 <div>
-                    <label for="password" class="block text-sm font-medium text-indigo-100 mb-2">Password</label>
-                    <input id="password" class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition @error('password') border-red-500 @enderror" 
-                        type="password" name="password" required>
-                    @error('password')
-                        <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                    <label for="role" class="field-label">Daftar Sebagai</label>
+                    <select id="role" name="role" class="field-select @error('role') border-rose-400 @enderror" required>
+                        <option value="">Pilih role akun</option>
+                        <option value="admin" @selected(old('role') === 'admin')>Admin</option>
+                        <option value="user" @selected(old('role') === 'user')>User / Anggota</option>
+                    </select>
+                    @error('role')<p class="mt-2 text-sm" style="color: var(--danger);">{{ $message }}</p>@enderror
                 </div>
 
-                <!-- Confirm Password -->
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-indigo-100 mb-2">Konfirmasi Password</label>
-                    <input id="password_confirmation" class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition" 
-                        type="password" name="password_confirmation" required>
-                    @error('password_confirmation')
-                        <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                    <label for="password" class="field-label">Password</label>
+                    <input id="password" type="password" name="password" required class="field-input @error('password') border-rose-400 @enderror" placeholder="Minimal 8 karakter">
+                    @error('password')<p class="mt-2 text-sm" style="color: var(--danger);">{{ $message }}</p>@enderror
                 </div>
 
-                <!-- Register Button -->
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition transform hover:scale-105 active:scale-95 shadow-lg mt-6">
-                    Daftar Sekarang
-                </button>
-
-                <!-- Login Link -->
-                <div class="text-center pt-4">
-                    <p class="text-indigo-200 text-sm">
-                        Sudah punya akun? 
-                        <a href="{{ route('login') }}" class="text-white font-semibold hover:underline">Masuk di sini</a>
-                    </p>
+                <div>
+                    <label for="password_confirmation" class="field-label">Konfirmasi Password</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" required class="field-input" placeholder="Ulangi password">
                 </div>
+
+                <button type="submit" class="btn-primary w-full">Daftar Sekarang</button>
             </form>
 
-            <!-- Info Section -->
-            <div class="mt-8 pt-6 border-t border-white/20">
-                <p class="text-white text-sm font-semibold mb-3">ℹ️ Informasi Pendaftaran:</p>
-                <div class="space-y-2 text-xs text-indigo-200">
-                    <p>• Daftar sebagai <span class="text-indigo-100 font-semibold">Peminjam</span> untuk meminjam laptop</p>
-                    <p>• Setelah mendaftar, Anda bisa langsung masuk dan mengajukan peminjaman</p>
-                    <p>• Petugas akan meninjau pengajuan peminjaman Anda</p>
-                </div>
+            <div class="mt-6 text-center text-sm" style="color: var(--muted);">
+                Sudah punya akun?
+                <a href="{{ route('login') }}" class="font-semibold" style="color: var(--accent-deep);">Masuk di sini</a>
+            </div>
+        </div>
+
+        <div class="auth-side">
+            <span class="hero-chip" style="color: var(--accent-deep); background: rgba(38,102,255,0.08);">Panduan Pendaftaran</span>
+            <h2 class="mt-4 text-5xl font-bold tracking-tight">Satu sistem untuk admin dan anggota perpustakaan.</h2>
+            <p class="mt-4 max-w-3xl leading-8" style="color: var(--muted);">
+                Desain dibuat terang, modern, dan terstruktur seperti referensi Anda agar nyaman dipakai dari halaman awal sampai semua halaman internal.
+            </p>
+            <div class="feature-grid mt-6">
+                <article class="info-card">
+                    <h3 class="text-lg font-bold">Admin</h3>
+                    <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Mengelola buku, kategori, anggota, dan transaksi.</p>
+                </article>
+                <article class="info-card">
+                    <h3 class="text-lg font-bold">User</h3>
+                    <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Mencari buku, meminjam, dan mengembalikan dari dashboard.</p>
+                </article>
+                <article class="info-card">
+                    <h3 class="text-lg font-bold">Role Otomatis</h3>
+                    <p class="mt-2 text-sm leading-7" style="color: var(--muted);">Role dipilih sekali saat daftar, lalu dipakai terus saat login.</p>
+                </article>
             </div>
         </div>
     </div>
-
 </body>
 </html>

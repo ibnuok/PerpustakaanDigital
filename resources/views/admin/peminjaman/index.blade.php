@@ -1,101 +1,108 @@
-@extends('admin.layout')
+@extends('layouts.portal')
+
+@section('title', 'Transaksi')
+@section('page_heading', 'Transaksi Perpustakaan')
+@section('page_description', 'Pantau seluruh pengajuan, pinjaman, dan pengembalian buku dengan pencarian serta filter lengkap.')
+
+@section('page_actions')
+    <a href="{{ route('admin.peminjaman.create') }}" class="btn-primary">Tambah Transaksi</a>
+@endsection
 
 @section('content')
-
-<div class="space-y-6">
-
-    <!-- Header -->
-    <div class="bg-gradient-to-br from-indigo-600/40 to-indigo-800/40 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-6 shadow-lg">
-        <h1 class="text-3xl font-bold text-indigo-300">📦 Data Peminjaman</h1>
-        <p class="text-indigo-200 mt-1">Pantau semua data peminjaman alat</p>
+    <div class="stats-grid">
+        <div class="stat-card"><p class="text-sm text-stone-500">Total Transaksi</p><p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalPeminjaman }}</p></div>
+        <div class="stat-card"><p class="text-sm text-stone-500">Menunggu</p><p class="mt-3 text-3xl font-bold text-slate-900">{{ $pending }}</p></div>
+        <div class="stat-card"><p class="text-sm text-stone-500">Dipinjam</p><p class="mt-3 text-3xl font-bold text-slate-900">{{ $approved }}</p></div>
+        <div class="stat-card"><p class="text-sm text-stone-500">Dikembalikan</p><p class="mt-3 text-3xl font-bold text-slate-900">{{ $returned }}</p></div>
     </div>
 
-    <!-- Statistik -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-gradient-to-br from-blue-600/40 to-blue-800/40 backdrop-blur-sm border border-blue-500/30 p-6 rounded-xl shadow text-white">
-            <p class="text-indigo-200 text-sm">Total Peminjaman</p>
-            <h2 class="text-3xl font-bold text-blue-300 mt-2">{{ $totalPeminjaman }}</h2>
+    <form method="GET" class="filter-panel mt-6">
+        <div class="filter-grid" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
+            <input type="text" name="search" value="{{ request('search') }}" class="field-input" placeholder="Cari peminjam / buku">
+            <select name="user_id" class="field-select">
+                <option value="">Semua akun</option>
+                @foreach ($users as $user)
+                    <option value="{{ $user->id }}" @selected(request('user_id') == $user->id)>{{ $user->name }}</option>
+                @endforeach
+            </select>
+            <select name="status" class="field-select">
+                <option value="">Semua status</option>
+                <option value="pending" @selected(request('status') === 'pending')>Menunggu</option>
+                <option value="approved" @selected(request('status') === 'approved')>Dipinjam</option>
+                <option value="returned" @selected(request('status') === 'returned')>Dikembalikan</option>
+            </select>
+            <input type="date" name="date_from" value="{{ request('date_from') }}" class="field-input">
+            <input type="date" name="date_to" value="{{ request('date_to') }}" class="field-input">
+            <div class="flex gap-3">
+                <button class="btn-primary flex-1">Filter</button>
+                <a href="{{ route('admin.peminjaman.index') }}" class="btn-secondary flex-1">Reset</a>
+            </div>
         </div>
+    </form>
 
-        <div class="bg-gradient-to-br from-yellow-600/40 to-yellow-800/40 backdrop-blur-sm border border-yellow-500/30 p-6 rounded-xl shadow text-white">
-            <p class="text-yellow-200 text-sm">Sedang Dipinjam</p>
-            <h2 class="text-3xl font-bold text-yellow-300 mt-2">{{ $dipinjam }}</h2>
-        </div>
-
-        <div class="bg-gradient-to-br from-emerald-600/40 to-emerald-800/40 backdrop-blur-sm border border-emerald-500/30 p-6 rounded-xl shadow text-white">
-            <p class="text-emerald-200 text-sm">Sudah Dikembalikan</p>
-            <h2 class="text-3xl font-bold text-emerald-300 mt-2">{{ $dikembalikan }}</h2>
-        </div>
-
-        <div class="bg-gradient-to-br from-purple-600/40 to-purple-800/40 backdrop-blur-sm border border-purple-500/30 p-6 rounded-xl shadow text-white text-center">
-            <p class="text-purple-200 text-sm">User Aktif Pinjam</p>
-            <h2 class="text-3xl font-bold text-purple-300 mt-2">{{ $userMeminjam }}</h2>
+    <div class="table-wrap mt-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white text-sm">
+                <thead class="bg-stone-50 text-left text-stone-500">
+                    <tr>
+                        <th class="px-6 py-4">Peminjam</th>
+                        <th class="px-6 py-4">Buku</th>
+                        <th class="px-6 py-4">Periode</th>
+                        <th class="px-6 py-4">Jumlah</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-200">
+                    @forelse ($peminjamans as $item)
+                        <tr>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-slate-900">{{ $item->user->name }}</p>
+                                <p class="mt-1 text-stone-500">{{ $item->user->email }}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-slate-900">{{ $item->buku->judul }}</p>
+                                <p class="mt-1 text-stone-500">{{ $item->buku->penulis }}</p>
+                            </td>
+                            <td class="px-6 py-4 text-stone-600">
+                                {{ $item->tanggal_pinjam->format('d M Y') }}<br>
+                                <span class="text-stone-400">s/d {{ $item->tanggal_kembali->format('d M Y') }}</span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-slate-900">{{ $item->jumlah }}</td>
+                            <td class="px-6 py-4">{!! $item->status_badge !!}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap justify-end gap-2">
+                                    <a href="{{ route('admin.peminjaman.show', $item) }}" class="btn-secondary">Detail</a>
+                                    @if ($item->isPending())
+                                        <a href="{{ route('admin.peminjaman.edit', $item) }}" class="btn-secondary">Edit</a>
+                                        <form action="{{ route('admin.peminjaman.approve', $item) }}" method="POST">
+                                            @csrf
+                                            <button class="btn-primary">Setujui</button>
+                                        </form>
+                                    @endif
+                                    @if ($item->isApproved())
+                                        <form action="{{ route('admin.peminjaman.return', $item) }}" method="POST">
+                                            @csrf
+                                            <button class="btn-secondary">Kembalikan</button>
+                                        </form>
+                                    @endif
+                                    <form action="{{ route('admin.peminjaman.destroy', $item) }}" method="POST" onsubmit="return confirm('Hapus transaksi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-10 text-center text-stone-500">Belum ada transaksi.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden shadow-lg">
-        <table class="w-full text-left text-gray-300">
-            <thead class="bg-gradient-to-r from-indigo-600/40 to-purple-600/40 border-b border-indigo-500/30">
-                <tr>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">No</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Peminjam</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Alat</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Jumlah</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Tanggal Pinjam</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Tanggal Kembali</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Status</th>
-                    <th class="px-6 py-4 text-indigo-300 font-semibold">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-white/10">
-                @forelse($peminjaman as $p)
-                <tr class="hover:bg-white/5 transition">
-                    <td class="px-6 py-4">{{ $loop->iteration }}</td>
-                    <td class="px-6 py-4">
-                        <div class="font-semibold text-white">{{ optional($p->user)->name ?? '-' }}</div>
-                        <div class="text-sm text-indigo-200">{{ optional($p->user)->email ?? '-' }}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="font-semibold text-white">{{ optional($p->alat)->nama_alat ?? '-' }}</div>
-                        <div class="text-sm text-indigo-200">{{ optional(optional($p->alat)->kategori)->nama_kategori ?? '-' }}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-block bg-indigo-500/30 text-indigo-300 border border-indigo-500/50 px-3 py-1 rounded-full text-sm font-semibold">{{ $p->jumlah ?? 1 }} unit</span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-300">{{ $p->tanggal_pinjam }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ $p->tanggal_kembali }}</td>
-
-                    <td class="px-6 py-4">
-                        @if($p->status == 'dipinjam')
-                            <span class="inline-block bg-yellow-500/20 text-yellow-300 border border-yellow-500/50 px-3 py-1 rounded-full text-sm font-semibold">
-                                ⏳ Dipinjam
-                            </span>
-                        @else
-                            <span class="inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 px-3 py-1 rounded-full text-sm font-semibold">
-                                ✓ Dikembalikan
-                            </span>
-                        @endif
-                    </td>
-
-                    <td class="px-6 py-4">
-                        <a href="{{ route('admin.peminjaman.show',$p->id) }}"
-                           class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 rounded-lg text-white text-sm font-semibold transition">
-                            👁 Lihat
-                        </a>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-8 text-center">
-                        <p class="text-indigo-200">Belum ada data peminjaman</p>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-</div>
-
+    <div class="mt-6">{{ $peminjamans->links() }}</div>
 @endsection

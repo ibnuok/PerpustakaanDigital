@@ -1,67 +1,63 @@
-@extends('admin.layout')
+@extends('layouts.portal')
 
-@section('title','Tambah Petugas')
+@section('title', 'Tambah Akun')
+@section('page_heading', 'Tambah Akun Baru')
+@section('page_description', 'Daftarkan admin atau anggota baru secara langsung dari panel perpustakaan.')
+
+@section('page_actions')
+    <a href="{{ route('admin.users.index') }}" class="btn-secondary">Kembali ke Anggota</a>
+@endsection
 
 @section('content')
-<div class="max-w-2xl">
-    <!-- Header -->
-    <div class="bg-white shadow-lg border border-gray-200 rounded-xl p-6 mb-6">
-        <h1 class="text-3xl font-bold text-indigo-700">Tambah Petugas Baru</h1>
-        <p class="text-indigo-600 mt-1">Buat akun untuk petugas yang akan mengelola peminjaman</p>
-    </div>
-
-    <!-- Form -->
-    <form action="{{ route('admin.users.store') }}" method="POST" class="bg-white shadow-lg border border-gray-200 rounded-xl p-6 space-y-6">
+    <form action="{{ route('admin.users.store') }}" method="POST" class="form-shell">
         @csrf
 
-        <!-- Name -->
-        <div>
-            <label class="block text-sm font-medium text-indigo-100 mb-2">Nama Lengkap</label>
-            <input type="text" name="name" placeholder="Masukkan nama petugas"
-                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition @error('name') border-red-500 @enderror"
-                value="{{ old('name') }}" required>
-            @error('name')
-                <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-            @enderror
+        <div class="form-panel">
+            <div class="form-grid">
+                <div>
+                    <label class="field-label" for="name">Nama Lengkap</label>
+                    <input id="name" type="text" name="name" value="{{ old('name') }}" class="field-input" required>
+                </div>
+                <div>
+                    <label class="field-label" for="email">Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" class="field-input" required>
+                </div>
+                <div>
+                    <label class="field-label" for="role">Role</label>
+                    <select id="role" name="role" class="field-select" required>
+                        <option value="">Pilih role</option>
+                        <option value="admin" @selected(old('role') === 'admin')>Admin</option>
+                        <option value="user" @selected(old('role') === 'user')>User</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="field-label" for="password">Password</label>
+                    <input id="password" type="password" name="password" class="field-input" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="field-label" for="password_confirmation">Konfirmasi Password</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" class="field-input" required>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button type="submit" class="btn-primary">Simpan Akun</button>
+                <a href="{{ route('admin.users.index') }}" class="btn-secondary">Batal</a>
+            </div>
         </div>
 
-        <!-- Email -->
-        <div>
-            <label class="block text-sm font-medium text-indigo-100 mb-2">Email</label>
-            <input type="email" name="email" placeholder="Masukkan email petugas"
-                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition @error('email') border-red-500 @enderror"
-                value="{{ old('email') }}" required>
-            @error('email')
-                <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <!-- Password -->
-        <div>
-            <label class="block text-sm font-medium text-indigo-100 mb-2">Password</label>
-            <input type="password" name="password" placeholder="Masukkan password (min 8 karakter)"
-                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-200/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition @error('password') border-red-500 @enderror"
-                required>
-            @error('password')
-                <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <!-- Role (Hidden, always Petugas) -->
-        <input type="hidden" name="role" value="petugas">
-        <div class="bg-indigo-500/20 border border-indigo-500/50 rounded-lg p-4">
-            <p class="text-indigo-100 text-sm"><span class="font-semibold">Role:</span> Petugas (penyetuju peminjaman)</p>
-        </div>
-
-        <!-- Buttons -->
-        <div class="flex gap-3">
-            <button type="submit" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 rounded-lg transition">
-                ✓ Simpan Petugas
-            </button>
-            <a href="{{ route('admin.users.index') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition text-center">
-                ✕ Batal
-            </a>
-        </div>
+        <aside class="guide-card">
+            <span class="badge-soft">Petunjuk Peran</span>
+            <div class="stack-list mt-4">
+                <div class="stack-item">
+                    <strong class="block">Admin</strong>
+                    <span class="detail-subvalue">Dapat mengelola buku, kategori, anggota, dan transaksi peminjaman.</span>
+                </div>
+                <div class="stack-item">
+                    <strong class="block">User</strong>
+                    <span class="detail-subvalue">Dapat melihat katalog, mengajukan pinjaman, dan mengembalikan buku.</span>
+                </div>
+            </div>
+        </aside>
     </form>
-</div>
 @endsection

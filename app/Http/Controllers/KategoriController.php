@@ -7,33 +7,54 @@ use Illuminate\Http\Request;
 
 class KategoriController extends Controller
 {
-    public function index()
-{
-    $kategori = Kategori::all();
-    return view('admin.kategori.index', compact('kategori'));
-}
+    public function index(Request $request)
+    {
+        $query = Kategori::query();
 
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('nama_kategori', 'like', "%{$search}%");
+        }
 
-    public function create(){
+        $kategoris = $query->paginate(10);
+        return view('admin.kategori.index', compact('kategoris'));
+    }
+
+    public function create()
+    {
         return view('admin.kategori.create');
     }
 
-    public function store(Request $request){
-        Kategori::create($request->all());
-        return redirect()->route('admin.kategori.index');
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_kategori' => 'required|string|max:255|unique:kategoris',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        Kategori::create($validated);
+        return redirect()->route('admin.kategori.index')->with('success', 'Kategori berhasil ditambahkan!');
     }
 
-    public function edit(Kategori $kategori){
+    public function edit(Kategori $kategori)
+    {
         return view('admin.kategori.edit', compact('kategori'));
     }
 
-    public function update(Request $request, Kategori $kategori){
-        $kategori->update($request->all());
-        return redirect()->route('admin.kategori.index');
+    public function update(Request $request, Kategori $kategori)
+    {
+        $validated = $request->validate([
+            'nama_kategori' => 'required|string|max:255|unique:kategoris,nama_kategori,' . $kategori->id,
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $kategori->update($validated);
+        return redirect()->route('admin.kategori.index')->with('success', 'Kategori berhasil diupdate!');
     }
 
-    public function destroy(Kategori $kategori){
+    public function destroy(Kategori $kategori)
+    {
         $kategori->delete();
-        return back();
+        return redirect()->route('admin.kategori.index')->with('success', 'Kategori berhasil dihapus!');
     }
 }

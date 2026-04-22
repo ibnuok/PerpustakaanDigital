@@ -1,60 +1,67 @@
-@extends('layouts.app-simple')
+@extends('layouts.portal')
 
 @section('title', 'Dashboard User')
+@section('page_heading', 'Dashboard User')
+@section('page_description', 'Lihat ringkasan transaksi, buku tersedia, dan akses cepat untuk meminjam buku.')
+
+@section('page_actions')
+    <a href="{{ route('user.bukus') }}" class="btn-primary">Lihat Katalog Buku</a>
+@endsection
+
 @section('content')
-
-<div class="max-w-6xl mx-auto">
-
-    <!-- Main Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        
-        <!-- Card: Lihat Daftar Alat -->
-        <a href="{{ route('user.alats') }}" class="group bg-gradient-to-br from-indigo-600/40 to-indigo-800/40 backdrop-blur-sm border border-indigo-500/50 p-8 rounded-xl hover:shadow-xl hover:scale-105 transition">
-            <div class="text-4xl mb-4">📋</div>
-            <h2 class="text-xl font-bold text-indigo-300 mb-2">Lihat Daftar Alat</h2>
-            <p class="text-indigo-200 text-sm">Browsing laptop tersedia dengan filter kategori</p>
-            <div class="mt-4 text-indigo-400 text-sm font-semibold group-hover:translate-x-1 transition">Lihat →</div>
-        </a>
-
-        <!-- Card: Ajukan Peminjaman -->
-        <a href="{{ route('user.peminjaman.create') }}" class="group bg-gradient-to-br from-emerald-600/40 to-emerald-800/40 backdrop-blur-sm border border-emerald-500/50 p-8 rounded-xl hover:shadow-xl hover:scale-105 transition">
-            <div class="text-4xl mb-4">✏️</div>
-            <h2 class="text-xl font-bold text-emerald-300 mb-2">Ajukan Peminjaman</h2>
-            <p class="text-emerald-200 text-sm">Ajukan peminjaman alat yang Anda butuhkan</p>
-            <div class="mt-4 text-emerald-400 text-sm font-semibold group-hover:translate-x-1 transition">Ajukan →</div>
-        </a>
-
-        <!-- Card: Monitor Peminjaman -->
-        <a href="{{ route('user.peminjaman.index') }}" class="group bg-gradient-to-br from-amber-600/40 to-amber-800/40 backdrop-blur-sm border border-amber-500/50 p-8 rounded-xl hover:shadow-xl hover:scale-105 transition">
-            <div class="text-4xl mb-4">📊</div>
-            <h2 class="text-xl font-bold text-amber-300 mb-2">Riwayat Peminjaman</h2>
-            <p class="text-amber-200 text-sm">Monitor pengajuan dan pengembalian alat</p>
-            <div class="mt-4 text-amber-400 text-sm font-semibold group-hover:translate-x-1 transition">Lihat →</div>
-        </a>
-
+    <div class="stats-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Pengajuan / Pinjaman Aktif</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $peminjamanAktif->count() }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Buku Tersedia</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $bukuTersedia }}</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-sm text-stone-500">Transaksi Selesai</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $peminjamanSelesai }}</p>
+        </div>
     </div>
 
-    <!-- Info Section -->
-    <div class="bg-gradient-to-r from-blue-950/40 to-purple-950/40 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-8 shadow-lg mt-8">
-        <h3 class="text-xl font-bold text-indigo-300 mb-4">ℹ️ Alur Peminjaman</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-indigo-200">
-            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-                <div class="text-2xl mb-2">1️⃣</div>
-                <p><strong>Ajukan Peminjaman</strong></p>
-                <p class="text-sm mt-2">Pilih alat dan tanggal yang Anda butuhkan</p>
+    <div class="section-grid mt-8">
+        <div class="soft-panel p-6">
+            <h2 class="text-lg font-bold text-slate-900">Menu Cepat</h2>
+            <div class="mt-4 grid gap-4">
+                <a href="{{ route('user.bukus') }}" class="info-card">
+                    <p class="font-semibold text-slate-900">Cari Buku</p>
+                    <p class="mt-2 text-sm leading-6 text-stone-500">Telusuri buku berdasarkan judul, penulis, kategori, dan kondisi.</p>
+                </a>
+                <a href="{{ route('user.peminjaman.index') }}" class="info-card">
+                    <p class="font-semibold text-slate-900">Kelola Transaksi Saya</p>
+                    <p class="mt-2 text-sm leading-6 text-stone-500">Pantau pengajuan, edit transaksi yang masih menunggu, atau kembalikan buku.</p>
+                </a>
             </div>
-            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-                <div class="text-2xl mb-2">2️⃣</div>
-                <p><strong>Menunggu Persetujuan</strong></p>
-                <p class="text-sm mt-2">Petugas akan mereview pengajuan Anda</p>
+        </div>
+
+        <div class="table-wrap">
+            <div class="table-head">
+                <h2 class="text-lg font-bold text-slate-900">Riwayat Terbaru</h2>
             </div>
-            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-                <div class="text-2xl mb-2">3️⃣</div>
-                <p><strong>Pinjam & Kembalikan</strong></p>
-                <p class="text-sm mt-2">Setelah disetujui, kelola peminjaman Anda</p>
+            <div class="divide-y divide-stone-200">
+                @forelse ($peminjamanTerbaru as $item)
+                    <div class="px-6 py-4">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="font-semibold text-slate-900">{{ $item->buku->judul }}</p>
+                                <p class="mt-1 text-sm text-stone-500">
+                                    {{ $item->tanggal_pinjam->format('d M Y') }} sampai {{ $item->tanggal_kembali->format('d M Y') }}
+                                </p>
+                            </div>
+                            <div>{!! $item->status_badge !!}</div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="px-6 py-10 text-center text-sm text-stone-500">
+                        Belum ada transaksi. Mulai dari katalog buku untuk melakukan peminjaman.
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>
-</div>
-
 @endsection

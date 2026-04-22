@@ -15,32 +15,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin User
         User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name' => 'Admin Pengawas',
+                'name' => 'Admin Perpustakaan',
                 'password' => bcrypt('admin123'),
                 'role' => 'admin',
             ]
         );
 
-        // Petugas User
         User::firstOrCreate(
-            ['email' => 'petugas@example.com'],
+            ['email' => 'anggota@example.com'],
             [
-                'name' => 'Petugas Sistem',
-                'password' => bcrypt('petugas123'),
-                'role' => 'petugas',
+                'name' => 'Anggota Perpustakaan',
+                'password' => bcrypt('user12345'),
+                'role' => 'user',
             ]
         );
 
-        // Regular Users (Peminjam)
         User::firstOrCreate(
             ['email' => 'budi@example.com'],
             [
                 'name' => 'Budi Santoso',
-                'password' => bcrypt('user123'),
+                'password' => bcrypt('user12345'),
                 'role' => 'user',
             ]
         );
@@ -49,7 +46,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'ani@example.com'],
             [
                 'name' => 'Ani Wijaya',
-                'password' => bcrypt('user123'),
+                'password' => bcrypt('user12345'),
                 'role' => 'user',
             ]
         );
@@ -58,15 +55,12 @@ class DatabaseSeeder extends Seeder
             ['email' => 'citra@example.com'],
             [
                 'name' => 'Citra Kusuma',
-                'password' => bcrypt('user123'),
+                'password' => bcrypt('user12345'),
                 'role' => 'user',
             ]
         );
 
-        // Seed Kategori first
         $this->call(KategoriSeeder::class);
-        
-        // Seed Alat
         $this->call(AlatSeeder::class);
     }
 }

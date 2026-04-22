@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kategori extends Model
 {
-    protected $fillable = ['nama_kategori'];
+    protected $table = 'kategoris';
 
-    public function alat()
+    protected $fillable = [
+        'nama_kategori',
+        'deskripsi'
+    ];
+
+    public function bukus()
     {
-        return $this->hasMany(Alat::class);
+        return $this->hasMany(Buku::class);
     }
 }

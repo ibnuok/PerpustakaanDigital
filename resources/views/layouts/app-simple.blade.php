@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistem Peminjaman Laptop')</title>
-    @vite('resources/css/app.css')
+    <link rel="stylesheet" href="{{ asset('css/app-fallback.css') }}">
+    @php($viteAssets = ['resources/css/app.css'])
+    @include('partials.vite')
 </head>
 
 <body class="bg-gradient-to-br from-slate-900 via-gray-900 to-black min-h-screen text-gray-100">
