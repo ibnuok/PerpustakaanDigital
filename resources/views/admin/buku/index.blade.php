@@ -1,17 +1,17 @@
 @extends('layouts.portal')
 
 @section('title', 'Data Buku')
-@section('page_heading', 'Data Buku')
-@section('page_description', 'Kelola koleksi buku perpustakaan, filter berdasarkan kategori dan kondisi, lalu cari dengan cepat.')
+@section('page_heading', '📚 Data Buku')
+@section('page_description', 'Kelola koleksi buku perpustakaan, filter berdasarkan kategori dan kondisi.')
 
 @section('page_actions')
-    <a href="{{ route('admin.buku.create') }}" class="btn-primary">Tambah Buku</a>
+    <a href="{{ route('admin.buku.create') }}" class="action-btn action-btn-primary">+ Tambah Buku</a>
 @endsection
 
 @section('content')
     <form method="GET" class="filter-panel">
         <div class="filter-grid">
-            <input type="text" name="search" value="{{ request('search') }}" class="field-input" placeholder="Cari judul, penulis, penerbit, ISBN">
+            <input type="text" name="search" value="{{ request('search') }}" class="field-input" placeholder="🔍 Cari buku...">
             <select name="kategori_id" class="field-select">
                 <option value="">Semua kategori</option>
                 @foreach ($kategoris as $kategori)
@@ -24,63 +24,68 @@
                 <option value="rusak_ringan" @selected(request('kondisi') === 'rusak_ringan')>Rusak Ringan</option>
                 <option value="rusak_berat" @selected(request('kondisi') === 'rusak_berat')>Rusak Berat</option>
             </select>
-            <div class="flex gap-3">
-                <button class="btn-primary flex-1">Filter</button>
-                <a href="{{ route('admin.buku.index') }}" class="btn-secondary flex-1">Reset</a>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="action-btn action-btn-primary" style="flex: 1;">🔍 Filter</button>
+                <a href="{{ route('admin.buku.index') }}" class="action-btn action-btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">Reset</a>
             </div>
         </div>
     </form>
 
-    <div class="table-wrap mt-6">
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white text-sm">
-                <thead class="bg-stone-50 text-left text-stone-500">
-                    <tr>
-                        <th class="px-6 py-4">Buku</th>
-                        <th class="px-6 py-4">Kategori</th>
-                        <th class="px-6 py-4">ISBN</th>
-                        <th class="px-6 py-4">Stok</th>
-                        <th class="px-6 py-4">Kondisi</th>
-                        <th class="px-6 py-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-stone-200">
-                    @forelse ($bukus as $buku)
+    <div class="card">
+        <div class="card-body" style="padding: 0;">
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-4">
-                                    <img src="{{ $buku->cover_url }}" alt="Cover {{ $buku->judul }}" class="mini-cover">
-                                    <div>
-                                        <p class="font-semibold text-slate-900">{{ $buku->judul }}</p>
-                                        <p class="mt-1 text-stone-500">{{ $buku->penulis }} - {{ $buku->penerbit }} ({{ $buku->tahun_terbit }})</p>
+                            <th>Buku</th>
+                            <th>Kategori</th>
+                            <th>ISBN</th>
+                            <th>Stok</th>
+                            <th>Kondisi</th>
+                            <th style="text-align: right;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($bukus as $buku)
+                            <tr>
+                                <td>
+                                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                                       <img src="{{ $buku->image && file_exists(public_path('images/'.$buku->image)) 
+    ? asset('images/'.$buku->image) 
+    : 'https://via.placeholder.com/50x75?text=Book' }}" 
+    alt="Cover {{ $buku->judul }}" 
+    style="width: 50px; height: 75px; object-fit: cover; border-radius: 6px; background: var(--bg-light);">
+                                            <p style="margin: 0; font-weight: 600; color: var(--text);">{{ $buku->judul }}</p>
+                                            <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--text-light);">{{ $buku->penulis ?? 'Unknown' }}</p>
+                                            <p style="margin: 0.25rem 0 0; font-size: 0.8rem; color: var(--text-light);">{{ $buku->penerbit ?? '-' }} ({{ $buku->tahun_terbit ?? '-' }})</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-stone-600">{{ $buku->kategori?->nama_kategori ?? '-' }}</td>
-                            <td class="px-6 py-4 text-stone-600">{{ $buku->isbn ?: '-' }}</td>
-                            <td class="px-6 py-4 font-semibold text-slate-900">{{ $buku->stok }}</td>
-                            <td class="px-6 py-4 text-stone-600">{{ str_replace('_', ' ', ucfirst($buku->kondisi)) }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.buku.show', $buku) }}" class="btn-secondary">Detail</a>
-                                    <a href="{{ route('admin.buku.edit', $buku) }}" class="btn-secondary">Edit</a>
-                                    <form action="{{ route('admin.buku.destroy', $buku) }}" method="POST" onsubmit="return confirm('Hapus buku ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn-danger">Hapus</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-stone-500">Belum ada data buku.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                </td>
+                                <td>{{ $buku->kategori?->nama_kategori ?? '-' }}</td>
+                                <td>{{ $buku->isbn ?: '-' }}</td>   
+                                <td><strong>{{ $buku->stok }}</strong></td>
+                                <td><span class="badge badge-{{ $buku->kondisi === 'baik' ? 'approved' : 'pending' }}">{{ str_replace('_', ' ', ucfirst($buku->kondisi)) }}</span></td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                        <a href="{{ route('admin.buku.edit', $buku) }}" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border-radius: 6px; border: none; cursor: pointer; text-decoration: none; font-weight: 600; font-size: 0.85rem;">Edit</a>
+                                        <form action="{{ route('admin.buku.destroy', $buku) }}" method="POST" style="display: inline;" onsubmit="return confirm('Hapus buku ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button style="padding: 0.5rem 1rem; background: var(--danger); color: white; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem;">Hapus</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-light);">Belum ada data buku.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="mt-6">{{ $bukus->links() }}</div>
+    <div style="margin-top: 2rem;">{{ $bukus->links() }}</div>
 @endsection

@@ -36,14 +36,24 @@
                     <label class="field-label" for="jumlah">Jumlah</label>
                     <input id="jumlah" type="number" name="jumlah" value="{{ old('jumlah', 1) }}" min="1" class="field-input" required>
                 </div>
-                <div>
-                    <label class="field-label" for="tanggal_pinjam">Tanggal Pinjam</label>
-                    <input id="tanggal_pinjam" type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', now()->toDateString()) }}" class="field-input" required>
-                </div>
                 <div class="md:col-span-2">
-                    <label class="field-label" for="tanggal_kembali">Tanggal Kembali</label>
-                    <input id="tanggal_kembali" type="date" name="tanggal_kembali" value="{{ old('tanggal_kembali') }}" class="field-input" required>
-                </div>
+                <label class="field-label">Durasi Peminjaman</label>
+
+                <select name="durasi" class="field-select" required>
+                    <option value="">Pilih durasi</option>
+                    <option value="60">1 Menit</option>
+                    <option value="300">5 Menit</option>
+                    <option value="600">10 Menit</option>
+                    <option value="1800">30 Menit</option>
+                    <option value="3600">1 Jam</option>
+                    <option value="7200">2 Jam</option>
+                    <option value="86400">1 Hari</option>
+                </select>
+
+                <small style="color: gray;">
+                    Sistem akan otomatis menghitung waktu kembali secara realtime
+                </small>
+            </div>
             </div>
 
             <div class="action-row">

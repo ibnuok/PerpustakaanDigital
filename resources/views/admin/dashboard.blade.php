@@ -1,64 +1,111 @@
 @extends('layouts.portal')
 
 @section('title', 'Dashboard Admin')
-@section('page_heading', 'Dashboard Admin')
+@section('page_heading', 'Good Morning Admin')
 @section('page_description', 'Ringkasan aktivitas perpustakaan, koleksi buku, anggota, dan transaksi terbaru dalam tampilan modern.')
 
 @section('page_actions')
-    <a href="{{ route('admin.buku.create') }}" class="btn-secondary">Tambah Buku</a>
-    <a href="{{ route('admin.peminjaman.create') }}" class="btn-primary">Buat Transaksi</a>
+    <a href="{{ route('admin.buku.create') }}" class="action-btn action-btn-secondary">+ Tambah Buku</a>
+    <a href="{{ route('admin.peminjaman.create') }}" class="action-btn action-btn-primary">+ Buat Transaksi</a>
 @endsection
 
 @section('content')
-    <div class="stats-grid">
+    <!-- Statistics Grid -->
+    <div class="dashboard-grid">
         <div class="stat-card">
-            <p class="text-sm text-stone-500">Total Stok Buku</p>
-            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalBuku }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-label">Total Stok Buku</div>
+                    <div class="stat-value">{{ $totalBuku }}</div>
+                </div>
+                <div style="font-size: 2rem;">📚</div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <p class="text-sm text-stone-500">Total Judul</p>
-            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalJudul }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-label">Total Judul</div>
+                    <div class="stat-value">{{ $totalJudul }}</div>
+                </div>
+                <div style="font-size: 2rem;">📖</div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <p class="text-sm text-stone-500">Anggota</p>
-            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalAnggota }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-label">Total Anggota</div>
+                    <div class="stat-value">{{ $totalAnggota }}</div>
+                </div>
+                <div style="font-size: 2rem;">👥</div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <p class="text-sm text-stone-500">Admin</p>
-            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $totalAdmin }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-label">Transaksi Aktif</div>
+                    <div class="stat-value">{{ $peminjamanAktif }}</div>
+                </div>
+                <div style="font-size: 2rem;">🔄</div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <p class="text-sm text-stone-500">Transaksi Aktif</p>
-            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $peminjamanAktif }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-label">Terlambat</div>
+                    <div class="stat-value" style="color: var(--danger);">{{ $peminjamanTerlambat }}</div>
+                </div>
+                <div style="font-size: 2rem;">⏰</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div class="stat-label">Admin</div>
+                    <div class="stat-value">{{ $totalAdmin }}</div>
+                </div>
+                <div style="font-size: 2rem;">🛡️</div>
+            </div>
         </div>
     </div>
 
-    <div class="section-grid mt-8">
-        <div class="table-wrap">
-            <div class="table-head">
-                <h2 class="text-lg font-bold text-slate-900">Transaksi Terbaru</h2>
+    <!-- Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+        <!-- Transactions Table -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Transaksi Terbaru</h2>
+                <a href="{{ route('admin.peminjaman.index') }}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Lihat Semua →</a>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-stone-50 text-left text-stone-500">
+            <div class="card-body" style="padding: 0;">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <th class="px-6 py-4">Peminjam</th>
-                            <th class="px-6 py-4">Buku</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4">Tanggal</th>
+                            <th>Peminjam</th>
+                            <th>Buku</th>
+                            <th>Status</th>
+                            <th>Sisa Waktu</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-stone-200">
+                    <tbody>
                         @forelse ($peminjamanTerbaru as $item)
-                            <tr class="bg-white">
-                                <td class="px-6 py-4 font-medium text-slate-900">{{ $item->user->name }}</td>
-                                <td class="px-6 py-4">{{ $item->buku->judul }}</td>
-                                <td class="px-6 py-4">{!! $item->status_badge !!}</td>
-                                <td class="px-6 py-4 text-stone-500">{{ $item->tanggal_pinjam->format('d M Y') }}</td>
+                            <tr>
+                                <td>{{ $item->user->name }}</td>
+                                <td>{{ $item->buku->judul }}</td>
+                                <td>
+                                    <span class="badge badge-{{ strtolower($item->status) }}">
+                                        {{ ucfirst($item->status) }}
+                                    </span>
+                                </td>
+                                <td style="color: {{ $item->isLate() ? 'var(--danger)' : 'var(--text-light)' }};">{{ $item->sisa_waktu_label }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-stone-500">Belum ada transaksi.</td>
+                                <td colspan="4" style="text-align: center; color: var(--text-light);">Belum ada transaksi.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -66,42 +113,49 @@
             </div>
         </div>
 
-        <div class="space-y-6">
-            <div class="soft-panel p-6">
-                <h2 class="text-lg font-bold text-slate-900">Statistik Status</h2>
-                <div class="mt-4 space-y-4 text-sm">
-                    <div class="info-card" style="padding: 1rem 1.2rem;">
-                        <div class="flex items-center justify-between">
-                            <span>Menunggu</span>
-                            <strong>{{ $statistikPerStatus['pending'] }}</strong>
+        <!-- Side Panel -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Statistics Status -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Statistik Status</h2>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-light);">Menunggu</span>
+                            <strong style="font-size: 1.2rem;">{{ $statistikPerStatus['pending'] ?? 0 }}</strong>
                         </div>
-                    </div>
-                    <div class="info-card" style="padding: 1rem 1.2rem;">
-                        <div class="flex items-center justify-between">
-                            <span>Dipinjam</span>
-                            <strong>{{ $statistikPerStatus['approved'] }}</strong>
+                        <div style="border-bottom: 1px solid var(--border-light);"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-light);">Dipinjam</span>
+                            <strong style="font-size: 1.2rem;">{{ $statistikPerStatus['approved'] ?? 0 }}</strong>
                         </div>
-                    </div>
-                    <div class="info-card" style="padding: 1rem 1.2rem;">
-                        <div class="flex items-center justify-between">
-                            <span>Dikembalikan</span>
-                            <strong>{{ $statistikPerStatus['returned'] }}</strong>
+                        <div style="border-bottom: 1px solid var(--border-light);"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-light);">Dikembalikan</span>
+                            <strong style="font-size: 1.2rem;">{{ $statistikPerStatus['returned'] ?? 0 }}</strong>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="soft-panel p-6">
-                <h2 class="text-lg font-bold text-slate-900">Buku Terpopuler</h2>
-                <div class="mt-4 space-y-4">
-                    @forelse ($bukuTerlaris as $buku)
-                        <div class="info-card">
-                            <p class="font-semibold text-slate-900">{{ $buku->judul }}</p>
-                            <p class="mt-1 text-sm text-stone-500">{{ $buku->penulis }} - {{ $buku->peminjamans_count }} transaksi</p>
-                        </div>
-                    @empty
-                        <p class="text-sm text-stone-500">Belum ada data buku terlaris.</p>
-                    @endforelse
+            <!-- Popular Books -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Buku Terpopuler</h2>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        @forelse ($bukuTerlaris as $buku)
+                            <div>
+                                <p style="margin: 0 0 0.25rem; font-weight: 600; font-size: 0.95rem;">{{ $buku->judul }}</p>
+                                <p style="margin: 0; font-size: 0.85rem; color: var(--text-light);">{{ $buku->penulis ?? 'Unknown' }} - {{ $buku->peminjamans_count }} transaksi</p>
+                            </div>
+                        @empty
+                            <p style="color: var(--text-light);">Belum ada data buku terlaris.</p>
+                        @endforelse
+                    </div>
                 </div>
             </div>
         </div>

@@ -41,6 +41,19 @@
                 <span class="detail-label">Tanggal Kembali</span>
                 <span class="detail-value">{{ $peminjaman->tanggal_kembali->format('d M Y') }}</span>
             </div>
+            <div class="detail-row">
+                <span class="detail-label">Sisa Waktu</span>
+                <span class="detail-value">{{ $peminjaman->sisa_waktu_label }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Tanggal Pengembalian</span>
+                <span class="detail-value">{{ $peminjaman->pengembalian?->tanggal_pengembalian?->format('d M Y') ?? '-' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Denda</span>
+                <span class="detail-value">Rp {{ number_format($peminjaman->denda, 0, ',', '.') }}</span>
+                <span class="detail-subvalue">Tarif otomatis Rp {{ number_format(\App\Models\Peminjaman::DENDA_PER_HARI, 0, ',', '.') }} per hari keterlambatan.</span>
+            </div>
             <div class="detail-row md:col-span-2">
                 <span class="detail-label">Disetujui Oleh</span>
                 <span class="detail-value">{{ $peminjaman->approvedBy?->name ?? '-' }}</span>

@@ -17,13 +17,17 @@ class AdminDashboardController extends Controller
         $totalAdmin = User::where('role', 'admin')->count();
         $totalPeminjaman = Peminjaman::count();
         $peminjamanAktif = Peminjaman::whereIn('status', ['pending', 'approved'])->count();
+        $peminjamanTerlambat = Peminjaman::with('pengembalian')
+            ->get()
+            ->filter(fn (Peminjaman $peminjaman) => $peminjaman->isLate())
+            ->count();
         
         $bukuTerlaris = Buku::withCount('peminjamans')
             ->orderByDesc('peminjamans_count')
             ->limit(5)
             ->get();
 
-        $peminjamanTerbaru = Peminjaman::with(['user', 'buku'])
+        $peminjamanTerbaru = Peminjaman::with(['user', 'buku', 'pengembalian'])
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
@@ -41,6 +45,7 @@ class AdminDashboardController extends Controller
             'totalAdmin',
             'totalPeminjaman',
             'peminjamanAktif',
+            'peminjamanTerlambat',
             'bukuTerlaris',
             'peminjamanTerbaru',
             'statistikPerStatus'

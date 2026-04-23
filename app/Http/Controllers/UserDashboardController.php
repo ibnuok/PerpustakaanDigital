@@ -13,7 +13,7 @@ class UserDashboardController extends Controller
         
         $peminjamanAktif = Peminjaman::where('user_id', $user->id)
             ->whereIn('status', ['pending', 'approved'])
-            ->with('buku')
+            ->with(['buku', 'pengembalian'])
             ->get();
 
         $peminjamanSelesai = Peminjaman::where('user_id', $user->id)
@@ -21,7 +21,7 @@ class UserDashboardController extends Controller
             ->count();
 
         $peminjamanTerbaru = Peminjaman::where('user_id', $user->id)
-            ->with('buku')
+            ->with(['buku', 'pengembalian'])
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();

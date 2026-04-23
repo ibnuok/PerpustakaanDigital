@@ -11,6 +11,7 @@ use App\Http\Controllers\UserPeminjamanController;
 use App\Http\Controllers\ProfileController;
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('users', UserController::class);
@@ -18,16 +19,31 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori', KategoriController::class)->except(['show']);
     Route::resource('peminjaman', PeminjamanController::class);
 
-    Route::post('/peminjaman/{peminjaman}/approve', [PeminjamanController::class, 'approve'])->name('peminjaman.approve');
-    Route::post('/peminjaman/{peminjaman}/return', [PeminjamanController::class, 'markReturned'])->name('peminjaman.return');
+    // 🔥 APPROVE (PENTING)
+    Route::post('/peminjaman/{peminjaman}/approve',
+        [PeminjamanController::class, 'approve']
+    )->name('peminjaman.approve');
+
+    // 🔥 RETURN
+    Route::post('/peminjaman/{peminjaman}/return',
+        [PeminjamanController::class, 'markReturned']
+    )->name('peminjaman.return');
 });
 
+
 Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(function () {
+
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+
     Route::get('/bukus', [UserPeminjamanController::class, 'bukus'])->name('bukus');
+
     Route::resource('peminjaman', UserPeminjamanController::class)->except(['show']);
-    Route::post('/peminjaman/{peminjaman}/return', [UserPeminjamanController::class, 'return'])->name('peminjaman.return');
+
+    Route::post('/peminjaman/{peminjaman}/return',
+        [UserPeminjamanController::class, 'return']
+    )->name('peminjaman.return');
 });
+
 
 Route::get('/', fn() => view('welcome'));
 
@@ -40,8 +56,9 @@ Route::get('/dashboard', function () {
 
     return redirect()->route('user.dashboard');
 })
-    ->middleware(['auth'])
-    ->name('dashboard');
+->middleware(['auth'])
+->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

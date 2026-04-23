@@ -1,75 +1,169 @@
-<?php
+                <?php
 
-namespace App\Models;
+                namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\Buku;
+                use Illuminate\Database\Eloquent\Model;
+                use Illuminate\Support\Carbon;
 
-class Peminjaman extends Model
-{
-    protected $table = 'peminjamans';
+                class Peminjaman extends Model
+                {
+                    protected $table = 'peminjamans';
 
-    protected $fillable = [
-        'user_id',
-        'buku_id',
-        'jumlah',
-        'tanggal_pinjam',
-        'tanggal_kembali',
-        'status',
-        'approved_by',
-        'approved_at'
-    ];
+                    public const DENDA_PER_DETIK = 10;
 
-    protected $casts = [
-        'tanggal_pinjam' => 'date',
-        'tanggal_kembali' => 'date',
-        'approved_at' => 'datetime',
-    ];
+                    protected $fillable = [
+                        'user_id',
+                        'buku_id',
+                        'jumlah',
+                        'tanggal_pinjam',
+                        'tanggal_kembali',
+                        'status',
+                    ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+                    protected $casts = [
+                        'tanggal_pinjam' => 'datetime',
+                        'tanggal_kembali' => 'datetime',
+                    ];
 
-    public function buku()
-    {
-        return $this->belongsTo(Buku::class);
-    }
+                    /* ================= RELASI ================= */
 
-    public function approvedBy()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
+                    public function user()
+                    {
+                        return $this->belongsTo(User::class);
+                    }
 
-    public function isPending(): bool
-    {
-        return $this->status === 'pending';
-    }
+                    public function buku()
+                    {
+                        return $this->belongsTo(Buku::class);
+                    }
 
-    public function isApproved(): bool
-    {
-        return $this->status === 'approved';
-    }
+                    public function pengembalian()
+                    {
+                        return $this->hasOne(Pengembalian::class);
+                    }
 
-    public function isReturned(): bool
-    {
-        return $this->status === 'returned';
-    }
+                    /* ================= STATUS UTAMA ================= */
 
-    public function isLate(): bool
-    {
-        return $this->isApproved() && now()->startOfDay()->greaterThan($this->tanggal_kembali);
-    }
+                    public function isDipinjam(): bool
+                    {
+                        return $this->status === 'dipinjam';
+                    }
 
-    public function getStatusBadgeAttribute()
-    {
-        $badges = [
-            'pending' => '<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Menunggu</span>',
-            'approved' => '<span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Dipinjam</span>',
-            'returned' => '<span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Dikembalikan</span>',
-        ];
+                    public function isReturned(): bool
+                    {
+                        return $this->status === 'returned';
+                    }
 
-        return $badges[$this->status] ?? $this->status;
-    }
-}
+                    public function isTerlambat(): bool
+                    {
+                        return $this->isDipinjam() && now()->gt($this->tanggal_kembali);
+                    }
+
+                    /* ================= COMPATIBILITY (BIAR BLADE LAMA GA ERROR) ================= */
+
+                    public function isPending(): bool
+                    {
+                        return $this->status === 'pending';
+                    }
+
+                    public function isApproved(): bool
+                    {
+                        return $this->status === 'dipinjam';
+                    }
+
+                    // 🔥 FIX ERROR isLate()
+                    public function isLate(): bool
+                    {
+                        return $this->isTerlambat();
+                    }
+
+                    /* ================= DENDA ================= */
+
+                    public function dendaRealtime(): int
+                    {
+                        // sudah dikembalikan
+                        if ($this->isReturned()) {
+                            return optional($this->pengembalian)->denda ?? 0;
+                        }
+
+                        // telat realtime
+                        if ($this->isTerlambat()) {
+                            $telat = now()->diffInSeconds($this->tanggal_kembali);
+                            return $telat * self::DENDA_PER_DETIK;
+                        }
+
+                        return 0;
+                    }
+
+                    // akses di blade: {{ $item->denda }}
+                    public function getDendaAttribute()
+                    {
+                        return $this->dendaRealtime();
+                    }
+
+                    /* ================= SISA WAKTU ================= */
+
+                    public function sisaDetik(): int
+                    {
+                        return now()->diffInSeconds($this->tanggal_kembali, false);
+                    }
+
+                    public function getSisaWaktuAttribute(): string
+                    {
+                        $diff = $this->sisaDetik();
+
+                        if ($diff <= 0) {
+                            return '00:00:00';
+                        }
+
+                        $h = floor($diff / 3600);
+                        $m = floor(($diff % 3600) / 60);
+                        $s = $diff % 60;
+
+                        return sprintf('%02d:%02d:%02d', $h, $m, $s);
+                    }
+
+                    /* ================= LABEL ================= */
+
+                    public function getSisaWaktuLabelAttribute()
+                    {
+                        if ($this->isReturned()) {
+                            return $this->denda > 0
+                                ? 'Terlambat'
+                                : 'Tepat waktu';
+                        }
+
+                        if ($this->isTerlambat()) {
+                            return 'Terlambat';
+                        }
+
+                        return $this->sisa_waktu;
+                    }
+
+                    /* ================= BADGE ================= */
+
+                    public function getStatusBadgeAttribute()
+                    {
+                        if ($this->isReturned()) {
+                            return '<span class="badge badge-returned">Dikembalikan</span>';
+                        }
+
+                        if ($this->isTerlambat()) {
+                            return '<span class="badge" style="background:red;color:white;">TERLAMBAT</span>';
+                        }
+
+                        return '<span class="badge badge-approved">Dipinjam</span>';
+                    }
+
+                    /* ================= FORMAT ================= */
+
+                    public function getTanggalPinjamFormatAttribute()
+                    {
+                        return $this->tanggal_pinjam->format('d M Y H:i:s');
+                    }
+
+                    public function getTanggalKembaliFormatAttribute()
+                    {
+                        return $this->tanggal_kembali->format('d M Y H:i:s');
+                    }
+                }

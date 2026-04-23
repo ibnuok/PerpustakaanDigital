@@ -15,8 +15,7 @@
             Isi informasi buku secara lengkap agar anggota lebih mudah menemukan judul, kategori, dan kondisi buku di katalog.
         </p>
     </div>
-
-    <form action="{{ route('admin.buku.store') }}" method="POST" class="form-shell">
+<form action="{{ route('admin.buku.store') }}" method="POST" enctype="multipart/form-data" class="form-shell">
         @csrf
 
         <div class="form-panel">
@@ -64,6 +63,12 @@
                     </select>
                 </div>
             </div>
+
+             <div>
+                <label class="field-label">Gambar Buku</label>
+                <input type="file" name="image" class="field-input">
+            </div>
+        </div>
 
             <div class="action-row">
                 <button type="submit" class="btn-primary">Simpan Buku</button>

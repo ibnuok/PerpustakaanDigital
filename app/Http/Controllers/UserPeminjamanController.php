@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Peminjaman;
 use App\Models\Buku;
 use App\Models\Kategori;
+use App\Models\Pengembalian;
 
 class UserPeminjamanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = auth()->user()->peminjamans()->with('buku.kategori')->latest();
+        $query = auth()->user()->peminjamans()->with(['buku.kategori', 'pengembalian'])->latest();
 
         if ($request->filled('search')) {
             $search = $request->string('search');
@@ -161,9 +163,21 @@ class UserPeminjamanController extends Controller
             return back()->with('error', 'Buku belum disetujui atau sudah dikembalikan.');
         }
 
-        $peminjaman->buku->increment('stok', $peminjaman->jumlah);
+        DB::transaction(function () use ($peminjaman) {
+            $returnedAt = now();
 
-        $peminjaman->update(['status' => 'returned']);
+            $peminjaman->buku->increment('stok', $peminjaman->jumlah);
+
+            Pengembalian::updateOrCreate(
+                ['peminjaman_id' => $peminjaman->id],
+                [
+                    'tanggal_pengembalian' => $returnedAt->toDateString(),
+                    'denda' => $peminjaman->calculateFine($returnedAt),
+                ]
+            );
+
+            $peminjaman->update(['status' => 'returned']);
+        });
 
         return back()->with('success', 'Buku berhasil dikembalikan. Terima kasih!');
     }

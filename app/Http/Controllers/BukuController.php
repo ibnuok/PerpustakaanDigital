@@ -42,18 +42,26 @@ class BukuController extends Controller
         return view('admin.buku.create', compact('kategoris'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'penulis' => 'required|string|max:255',
-            'penerbit' => 'required|string|max:255',
-            'tahun_terbit' => 'required|digits:4',
-            'isbn' => 'nullable|string|unique:bukus,isbn',
-            'stok' => 'required|integer|min:1',
-            'kondisi' => 'required|in:baik,rusak_ringan,rusak_berat',
-            'kategori_id' => 'required|exists:kategoris,id',
-        ]);
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'judul' => 'required|string|max:255',
+        'penulis' => 'required|string|max:255',
+        'penerbit' => 'required|string|max:255',
+        'tahun_terbit' => 'required|digits:4',
+        'isbn' => 'nullable|string|unique:bukus,isbn',
+        'stok' => 'required|integer|min:1',
+        'kondisi' => 'required|in:baik,rusak_ringan,rusak_berat',
+        'kategori_id' => 'required|exists:kategoris,id',
+        'image' => 'nullable|file'
+    ]);
+
+    // 🔥 HANDLE UPLOAD GAMBAR
+    if ($request->hasFile('image')) {
+        $imageName = time().'.'.$request->image->extension();
+        $request->image->move(public_path('images'), $imageName);
+        $validated['image'] = $imageName;
+    }
 
         Buku::create($validated);
 
