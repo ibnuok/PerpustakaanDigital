@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Models\User;
-use App\Models\Kategori;
 
 class AdminDashboardController extends Controller
 {
@@ -16,12 +15,11 @@ class AdminDashboardController extends Controller
         $totalAnggota = User::where('role', 'user')->count();
         $totalAdmin = User::where('role', 'admin')->count();
         $totalPeminjaman = Peminjaman::count();
-        $peminjamanAktif = Peminjaman::whereIn('status', ['pending', 'approved'])->count();
-        $peminjamanTerlambat = Peminjaman::with('pengembalian')
-            ->get()
-            ->filter(fn (Peminjaman $peminjaman) => $peminjaman->isLate())
+        $peminjamanAktif = Peminjaman::whereIn('status', ['pending', 'dipinjam'])->count();
+        $peminjamanTerlambat = Peminjaman::where('status', 'dipinjam')
+            ->where('tanggal_kembali', '<', now())
             ->count();
-        
+
         $bukuTerlaris = Buku::withCount('peminjamans')
             ->orderByDesc('peminjamans_count')
             ->limit(5)
@@ -34,7 +32,7 @@ class AdminDashboardController extends Controller
 
         $statistikPerStatus = [
             'pending' => Peminjaman::where('status', 'pending')->count(),
-            'approved' => Peminjaman::where('status', 'approved')->count(),
+            'dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
             'returned' => Peminjaman::where('status', 'returned')->count(),
         ];
 

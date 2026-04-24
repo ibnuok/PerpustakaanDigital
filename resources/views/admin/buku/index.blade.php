@@ -24,7 +24,7 @@
                 <option value="rusak_ringan" @selected(request('kondisi') === 'rusak_ringan')>Rusak Ringan</option>
                 <option value="rusak_berat" @selected(request('kondisi') === 'rusak_berat')>Rusak Berat</option>
             </select>
-            <div style="display: flex; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 <button class="action-btn action-btn-primary" style="flex: 1;">🔍 Filter</button>
                 <a href="{{ route('admin.buku.index') }}" class="action-btn action-btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">Reset</a>
             </div>
@@ -34,7 +34,7 @@
     <div class="card">
         <div class="card-body" style="padding: 0;">
             <div style="overflow-x: auto;">
-                <table class="table">
+                <table class="table responsive-table">
                     <thead>
                         <tr>
                             <th>Buku</th>
@@ -48,7 +48,7 @@
                     <tbody>
                         @forelse ($bukus as $buku)
                             <tr>
-                                <td>
+                                <td data-label="Buku">
                                     <div style="display: flex; gap: 1rem; align-items: flex-start;">
                                        <img src="{{ $buku->image && file_exists(public_path('images/'.$buku->image)) 
     ? asset('images/'.$buku->image) 
@@ -61,11 +61,11 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $buku->kategori?->nama_kategori ?? '-' }}</td>
-                                <td>{{ $buku->isbn ?: '-' }}</td>   
-                                <td><strong>{{ $buku->stok }}</strong></td>
-                                <td><span class="badge badge-{{ $buku->kondisi === 'baik' ? 'approved' : 'pending' }}">{{ str_replace('_', ' ', ucfirst($buku->kondisi)) }}</span></td>
-                                <td style="text-align: right;">
+                                <td data-label="Kategori">{{ $buku->kategori?->nama_kategori ?? '-' }}</td>
+                                <td data-label="ISBN">{{ $buku->isbn ?: '-' }}</td>   
+                                <td data-label="Stok"><strong>{{ $buku->stok }}</strong></td>
+                                <td data-label="Kondisi"><span class="badge badge-{{ $buku->kondisi === 'baik' ? 'approved' : 'pending' }}">{{ str_replace('_', ' ', ucfirst($buku->kondisi)) }}</span></td>
+                                <td data-label="Aksi" style="text-align: right;">
                                     <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
                                         <a href="{{ route('admin.buku.edit', $buku) }}" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border-radius: 6px; border: none; cursor: pointer; text-decoration: none; font-weight: 600; font-size: 0.85rem;">Edit</a>
                                         <form action="{{ route('admin.buku.destroy', $buku) }}" method="POST" style="display: inline;" onsubmit="return confirm('Hapus buku ini?')">

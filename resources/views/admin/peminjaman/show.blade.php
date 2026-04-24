@@ -52,7 +52,7 @@
             <div class="detail-row">
                 <span class="detail-label">Denda</span>
                 <span class="detail-value">Rp {{ number_format($peminjaman->denda, 0, ',', '.') }}</span>
-                <span class="detail-subvalue">Tarif otomatis Rp {{ number_format(\App\Models\Peminjaman::DENDA_PER_HARI, 0, ',', '.') }} per hari keterlambatan.</span>
+                <span class="detail-subvalue">Tarif terlambat Rp {{ number_format(\App\Models\Peminjaman::DENDA_PER_HARI, 0, ',', '.') }} per hari. Denda kerusakan default Rp {{ number_format(\App\Models\Peminjaman::DENDA_KERUSAKAN, 0, ',', '.') }} per kejadian.</span>
             </div>
             <div class="detail-row md:col-span-2">
                 <span class="detail-label">Disetujui Oleh</span>

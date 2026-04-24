@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
 class Peminjaman extends Model
 {
     protected $table = 'peminjamans';
 
-    // ✅ UBAH KE PER HARI
-    public const DENDA_PER_HARI = 1000;
+    public const DENDA_PER_HARI = 5000;
+    public const DENDA_KERUSAKAN = 25000;
 
     protected $fillable = [
         'user_id',
@@ -26,8 +26,6 @@ class Peminjaman extends Model
         'tanggal_kembali' => 'datetime',
     ];
 
-    /* ================= RELASI ================= */
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -42,8 +40,6 @@ class Peminjaman extends Model
     {
         return $this->hasOne(Pengembalian::class);
     }
-
-    /* ================= STATUS ================= */
 
     public function isDipinjam(): bool
     {
@@ -75,27 +71,41 @@ class Peminjaman extends Model
         return $this->isTerlambat();
     }
 
-    /* ================= DENDA (PER HARI) ================= */
+    public function calculateLateDays(?CarbonInterface $returnedAt = null): int
+    {
+        $returnedAt ??= now();
+
+        if ($returnedAt->lessThanOrEqualTo($this->tanggal_kembali)) {
+            return 0;
+        }
+
+        $lateSeconds = $this->tanggal_kembali->diffInSeconds($returnedAt);
+
+        return max(1, (int) ceil($lateSeconds / 86400));
+    }
+
+    public function calculateLateFine(?CarbonInterface $returnedAt = null): int
+    {
+        return $this->calculateLateDays($returnedAt) * self::DENDA_PER_HARI;
+    }
+
+    public function calculateFine(?CarbonInterface $returnedAt = null): int
+    {
+        return $this->calculateLateFine($returnedAt);
+    }
 
     public function getDendaAttribute()
     {
-        // kalau sudah dikembalikan
         if ($this->isReturned()) {
             return $this->pengembalian->denda ?? 0;
         }
 
-        // kalau belum telat
         if (!$this->isTerlambat()) {
             return 0;
         }
 
-        // hitung hari telat
-        $hariTelat = $this->tanggal_kembali->diffInDays(now());
-
-        return $hariTelat * self::DENDA_PER_HARI;
+        return $this->calculateLateFine(now());
     }
-
-    /* ================= SISA WAKTU ================= */
 
     public function sisaDetik(): int
     {
@@ -117,14 +127,10 @@ class Peminjaman extends Model
         return sprintf('%02d:%02d:%02d', $h, $m, $s);
     }
 
-    /* ================= LABEL ================= */
-
     public function getSisaWaktuLabelAttribute()
     {
         if ($this->isReturned()) {
-            return $this->denda > 0
-                ? 'Terlambat'
-                : 'Tepat waktu';
+            return $this->denda > 0 ? 'Terlambat' : 'Tepat waktu';
         }
 
         if ($this->isTerlambat()) {
@@ -133,8 +139,6 @@ class Peminjaman extends Model
 
         return $this->sisa_waktu;
     }
-
-    /* ================= BADGE ================= */
 
     public function getStatusBadgeAttribute()
     {
@@ -146,10 +150,12 @@ class Peminjaman extends Model
             return '<span class="badge" style="background:red;color:white;">TERLAMBAT</span>';
         }
 
+        if ($this->isPending()) {
+            return '<span class="badge bg-yellow-100 text-yellow-700">Menunggu</span>';
+        }
+
         return '<span class="badge badge-approved">Dipinjam</span>';
     }
-
-    /* ================= FORMAT ================= */
 
     public function getTanggalPinjamFormatAttribute()
     {

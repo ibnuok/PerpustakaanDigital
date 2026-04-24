@@ -28,7 +28,7 @@
             <p class="mt-2 text-sm" style="color: var(--muted);">Lihat semua admin dan anggota dalam satu tampilan yang rapi dan mudah dikelola.</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full bg-white text-sm">
+            <table class="min-w-full bg-white text-sm responsive-table">
                 <thead class="bg-stone-50 text-left">
                     <tr>
                         <th>Nama</th>
@@ -41,15 +41,15 @@
                 <tbody>
                     @forelse ($users as $user)
                         <tr>
-                            <td>
+                            <td data-label="Nama">
                                 <strong>{{ $user->name }}</strong>
                             </td>
-                            <td>{{ $user->email }}</td>
-                            <td>
+                            <td data-label="Email">{{ $user->email }}</td>
+                            <td data-label="Role">
                                 <span class="badge-soft">{{ strtoupper($user->role) }}</span>
                             </td>
-                            <td>{{ $user->created_at?->format('d M Y') ?? '-' }}</td>
-                            <td>
+                            <td data-label="Bergabung">{{ $user->created_at?->format('d M Y') ?? '-' }}</td>
+                            <td data-label="Aksi">
                                 <div class="action-row" style="justify-content: flex-end;">
                                     <a href="{{ route('admin.users.show', $user) }}" class="btn-secondary">Detail</a>
                                     <a href="{{ route('admin.users.edit', $user) }}" class="btn-secondary">Edit</a>

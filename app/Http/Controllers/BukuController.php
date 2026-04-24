@@ -101,7 +101,7 @@ public function store(Request $request)
 
     public function destroy(Buku $buku)
     {
-        if ($buku->peminjamans()->where('status', 'approved')->exists()) {
+        if ($buku->peminjamans()->where('status', 'dipinjam')->exists()) {
             return redirect()->route('admin.buku.index')
                 ->with('error', 'Buku tidak dapat dihapus karena masih sedang dipinjam.');
         }
@@ -111,3 +111,4 @@ public function store(Request $request)
             ->with('success', 'Buku berhasil dihapus!');
     }
 }
+

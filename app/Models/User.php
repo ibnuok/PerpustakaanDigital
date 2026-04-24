@@ -69,6 +69,7 @@ class User extends Authenticatable
 
     public function totalPeminjamanAktif()
     {
-        return $this->peminjamans()->whereIn('status', ['pending', 'approved'])->count();
+        return $this->peminjamans()->whereIn('status', ['pending', 'dipinjam'])->count();
     }
 }
+

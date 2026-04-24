@@ -17,7 +17,7 @@
 
     <div class="mt-6 overflow-hidden rounded-3xl border border-stone-200">
         <div class="overflow-x-auto">
-            <table class="min-w-full bg-white text-sm">
+            <table class="min-w-full bg-white text-sm responsive-table">
                 <thead class="bg-stone-50 text-left text-stone-500">
                     <tr>
                         <th class="px-6 py-4">Nama Kategori</th>
@@ -28,9 +28,9 @@
                 <tbody class="divide-y divide-stone-200">
                     @forelse ($kategoris as $kategori)
                         <tr>
-                            <td class="px-6 py-4 font-semibold text-slate-900">{{ $kategori->nama_kategori }}</td>
-                            <td class="px-6 py-4 text-stone-600">{{ $kategori->deskripsi ?: '-' }}</td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 font-semibold text-slate-900" data-label="Nama Kategori">{{ $kategori->nama_kategori }}</td>
+                            <td class="px-6 py-4 text-stone-600" data-label="Deskripsi">{{ $kategori->deskripsi ?: '-' }}</td>
+                            <td class="px-6 py-4" data-label="Aksi">
                                 <div class="flex justify-end gap-2">
                                     <a href="{{ route('admin.kategori.edit', $kategori) }}" class="btn-secondary !px-4 !py-2">Edit</a>
                                     <form action="{{ route('admin.kategori.destroy', $kategori) }}" method="POST" onsubmit="return confirm('Hapus kategori ini?')">

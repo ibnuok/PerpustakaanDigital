@@ -10,10 +10,11 @@ class UserDashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         $peminjamanAktif = Peminjaman::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', ['pending', 'dipinjam'])
             ->with(['buku', 'pengembalian'])
+            ->latest()
             ->get();
 
         $peminjamanSelesai = Peminjaman::where('user_id', $user->id)
@@ -26,12 +27,24 @@ class UserDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $tagihanAktif = $user->peminjamans()
+            ->with(['buku', 'pengembalian'])
+            ->whereHas('pengembalian', function ($query) {
+                $query->where('denda', '>', 0)
+                    ->where('status_pembayaran', '!=', 'sudah_dibayar');
+            })
+            ->latest()
+            ->get();
+
+        $totalTagihan = $tagihanAktif->sum(fn ($item) => $item->pengembalian->denda ?? 0);
         $bukuTersedia = Buku::where('stok', '>', 0)->count();
 
         return view('user.dashboard', compact(
             'peminjamanAktif',
             'peminjamanSelesai',
             'peminjamanTerbaru',
+            'tagihanAktif',
+            'totalTagihan',
             'bukuTersedia'
         ));
     }

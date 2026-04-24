@@ -21,17 +21,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kategori', KategoriController::class)->except(['show']);
     Route::resource('peminjaman', PeminjamanController::class);
 
-    // 🔥 APPROVE (PENTING)
     Route::post('/peminjaman/{peminjaman}/approve',
         [PeminjamanController::class, 'approve']
     )->name('peminjaman.approve');
 
-    // 🔥 RETURN
     Route::post('/peminjaman/{peminjaman}/return',
         [PeminjamanController::class, 'markReturned']
     )->name('peminjaman.return');
 
-    // 🔥 CEK KERUSAKAN
     Route::get('/peminjaman/{peminjaman}/check-damage',
         [PeminjamanController::class, 'checkDamageForm']
     )->name('peminjaman.check-damage');
@@ -40,7 +37,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         [PeminjamanController::class, 'saveDamage']
     )->name('peminjaman.save-damage');
 
-    // 🔥 DENDA MANAGEMENT
     Route::resource('denda', AdminDendaController::class)->only(['index', 'show']);
     Route::post('/denda/{pengembalian}/approve', [AdminDendaController::class, 'approve'])->name('denda.approve');
     Route::post('/denda/{pengembalian}/reject', [AdminDendaController::class, 'reject'])->name('denda.reject');
@@ -55,13 +51,15 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
 
     Route::get('/bukus', [UserPeminjamanController::class, 'bukus'])->name('bukus');
 
-    Route::resource('peminjaman', UserPeminjamanController::class)->except(['show']);
+    // ✅ Daftarkan /create MANUAL sebelum resource agar tidak bentrok dengan {peminjaman}
+    Route::get('/peminjaman/create', [UserPeminjamanController::class, 'create'])->name('peminjaman.create');
+
+    Route::resource('peminjaman', UserPeminjamanController::class)->except(['show', 'create']);
 
     Route::post('/peminjaman/{peminjaman}/return',
         [UserPeminjamanController::class, 'return']
     )->name('peminjaman.return');
 
-    // 🔥 DENDA MANAGEMENT
     Route::resource('denda', UserDendaController::class)->only(['index', 'show']);
     Route::get('/denda/{pengembalian}/payment', [UserDendaController::class, 'paymentForm'])->name('denda.payment');
     Route::post('/denda/{pengembalian}/submit-payment', [UserDendaController::class, 'submitPayment'])->name('denda.submit-payment');

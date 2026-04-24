@@ -1,265 +1,161 @@
 @extends('layouts.portal')
 
-@section('title', 'Daftar Denda Saya')
-@section('page_heading', 'Denda Perpustakaan')
-@section('page_description', 'Kelola pembayaran denda keterlambatan dan kerusakan buku')
+@section('title', 'Denda Saya')
+@section('page_heading', 'Denda Saya')
+@section('page_description', 'Bayar denda telat dan kerusakan dari sini. Status pembayaran tetap sinkron dengan backend yang sudah ada.')
 
 @section('page_actions')
-    <a href="{{ route('user.denda.history') }}" class="btn-secondary">📋 Riwayat Pembayaran</a>
+    <a href="{{ route('user.denda.history') }}" class="btn-secondary">Riwayat Pembayaran</a>
 @endsection
 
 @section('content')
-    <style>
-        .stats-box {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            padding: 24px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
+<section class="stat-card" style="margin-bottom:20px;">
+    <div class="stat-label">Total Denda Belum Lunas</div>
+    <div class="stat-value" style="color: {{ $totalDenda > 0 ? 'var(--danger)' : 'var(--success)' }};">Rp {{ number_format($totalDenda, 0, ',', '.') }}</div>
+</section>
 
-        .stats-amount {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 8px 0;
-        }
-
-        .stats-label {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .elegant-table {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .elegant-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .elegant-table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .elegant-table thead th {
-            padding: 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .elegant-table tbody tr {
-            border-bottom: 1px solid #e5e7eb;
-            transition: background 0.2s ease;
-        }
-
-        .elegant-table tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .elegant-table tbody td {
-            padding: 16px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .status-belum {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-lunas {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .denda-amount {
-            font-weight: 600;
-            color: #dc2626;
-            font-size: 1.1rem;
-        }
-
-        .btn-bayar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .btn-bayar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-lunas {
-            background: #d1d5db;
-            color: #6b7280;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: not-allowed;
-            font-size: 0.9rem;
-        }
-
-        .empty-state {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            border: 2px solid #10b981;
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-        }
-
-        .empty-state-text {
-            color: #065f46;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .book-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .book-title {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 4px;
-        }
-
-        .book-author {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
-        .denda-items {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-    </style>
-
-    @if($pengembalians->count() > 0)
-        {{-- STATISTIK DENDA --}}
-        <div class="stats-box">
-            <div class="stats-label">Total Denda yang Belum Dibayar</div>
-            <div class="stats-amount">Rp {{ number_format($totalDenda, 0, ',', '.') }}</div>
-        </div>
-
-        {{-- DAFTAR DENDA --}}
-        <div class="elegant-table" style="margin-top: 24px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>📚 Buku</th>
-                        <th>💰 Denda</th>
-                        <th>📌 Jenis</th>
-                        <th>✓ Status</th>
-                        <th style="text-align: right;">⚙️ Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($pengembalians as $item)
-                        @if ($item->pengembalian && $item->pengembalian->denda > 0)
-                            <tr>
-                                <td>
-                                    <div class="book-info">
-                                        <div class="book-title">{{ $item->buku->judul }}</div>
-                                        <div class="book-author">{{ $item->buku->penulis }}</div>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <div class="denda-amount">
-                                        Rp {{ number_format($item->pengembalian->denda, 0, ',', '.') }}
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <div style="font-size: 0.875rem;">
-                                        @if ($item->pengembalian->ada_kerusakan)
-                                            <span class="status-badge" style="background: #fee2e2; color: #991b1b; display: block; margin-bottom: 4px;">
-                                                🔴 Kerusakan
-                                            </span>
-                                        @endif
-                                        
-                                        @if ($item->isTerlambat() || ($item->pengembalian->denda > 0 && !$item->pengembalian->ada_kerusakan))
-                                            <span class="status-badge" style="background: #fef3c7; color: #92400e; display: block;">
-                                                ⏰ Keterlambatan
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td>
-                                    @if ($item->pengembalian->status_pembayaran === 'belum_dibayar')
-                                        <span class="status-badge status-belum">Belum Dibayar</span>
-                                    @elseif ($item->pengembalian->status_pembayaran === 'pending_approval')
-                                        <span class="status-badge status-pending">Pending Approval</span>
-                                    @else
-                                        <span class="status-badge status-lunas">✓ Sudah Dibayar</span>
-                                    @endif
-                                </td>
-
-                                <td style="text-align: right;">
-                                    @if ($item->pengembalian->status_pembayaran === 'belum_dibayar')
-                                        <a href="{{ route('user.denda.payment', $item->pengembalian) }}" class="btn-bayar">
-                                            Bayar
-                                        </a>
-                                    @elseif ($item->pengembalian->status_pembayaran === 'pending_approval')
-                                        <button class="btn-lunas" style="cursor: wait;">
-                                            Menunggu...
-                                        </button>
-                                    @else
-                                        <button class="btn-lunas" style="background: #d1fae5; color: #065f46;">
-                                            ✓ Lunas
-                                        </button>
-                                    @endif
-                                </td>
-                            </tr>
+<div class="table-wrap">
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Buku</th>
+                <th>Rincian</th>
+                <th>Status</th>
+                <th>Metode</th>
+                <th class="text-right">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($pengembalians as $item)
+                @php($pengembalian = $item->pengembalian)
+                <tr>
+                    <td data-label="Buku">
+                        <strong>{{ $item->buku->judul }}</strong><br>
+                        <small>{{ $item->buku->penulis ?? 'Penulis tidak tersedia' }}</small>
+                    </td>
+                    <td data-label="Rincian">
+                        <div><strong>{{ $pengembalian->jenis_denda_label }}</strong></div>
+                        @if (($pengembalian->denda_telat ?? 0) > 0)
+                            <div>Terlambat {{ $pengembalian->hari_terlambat }} hari: Rp {{ number_format($pengembalian->denda_telat ?? 0, 0, ',', '.') }}</div>
                         @endif
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                        @if (($pengembalian->denda_kerusakan ?? 0) > 0)
+                            <div>Kerusakan buku: Rp {{ number_format($pengembalian->denda_kerusakan ?? 0, 0, ',', '.') }}</div>
+                        @endif
+                        <strong style="display:block; margin-top:6px; color:var(--danger);">Total Rp {{ number_format($pengembalian->denda, 0, ',', '.') }}</strong>
+                        @if ($pengembalian->catatan_penolakan)
+                            <small style="color:var(--danger);">Catatan admin: {{ $pengembalian->catatan_penolakan }}</small>
+                        @endif
+                    </td>
+                    <td data-label="Status">
+                        @if ($pengembalian->status_pembayaran === 'belum_dibayar')
+                            <span class="status-badge status-belum">Belum Lunas</span>
+                        @elseif ($pengembalian->status_pembayaran === 'pending_approval')
+                            <span class="status-badge status-pending">Menunggu Verifikasi</span>
+                        @else
+                            <span class="status-badge status-lunas">Lunas</span>
+                        @endif
+                    </td>
+                    <td data-label="Metode">{{ $pengembalian->metode_pembayaran_label }}</td>
+                    <td data-label="Aksi">
+                        @if ($pengembalian->status_pembayaran !== 'sudah_dibayar')
+                            <button type="button" class="btn-primary" data-open-payment data-target="user-denda-modal-{{ $pengembalian->id }}">Bayar</button>
+                        @else
+                            <span class="btn-secondary">Selesai</span>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="empty-state">Tidak ada denda aktif. Semua transaksi Anda aman.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 
-        <div style="margin-top: 20px;">
-            {{ $pengembalians->links() }}
+<div style="margin-top:20px;">{{ $pengembalians->links() }}</div>
+
+@foreach ($pengembalians as $item)
+    @php($pengembalian = $item->pengembalian)
+    <div class="modal-backdrop" id="user-denda-modal-{{ $pengembalian->id }}">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+                <div>
+                    <span class="badge-soft">Pembayaran Denda</span>
+                    <h3 style="margin:12px 0 4px;">{{ $item->buku->judul }}</h3>
+                    <p style="margin:0; color:var(--muted);">Silakan pilih metode pembayaran untuk tagihan ini.</p>
+                </div>
+                <button type="button" class="btn-secondary" data-close-modal>Tutup</button>
+            </div>
+
+            <div class="detail-grid" style="margin-top:18px;">
+                <div class="stack-item"><strong>Denda Terlambat</strong><div>{{ ($pengembalian->denda_telat ?? 0) > 0 ? $pengembalian->hari_terlambat . ' hari • Rp ' . number_format($pengembalian->denda_telat ?? 0, 0, ',', '.') : 'Tidak terkena denda terlambat' }}</div></div>
+                <div class="stack-item"><strong>Denda Kerusakan</strong><div>{{ ($pengembalian->denda_kerusakan ?? 0) > 0 ? 'Rp ' . number_format($pengembalian->denda_kerusakan ?? 0, 0, ',', '.') : 'Tidak terkena denda kerusakan' }}</div></div>
+            </div>
+
+            <form action="{{ route('user.denda.submit-payment', $pengembalian) }}" method="POST" enctype="multipart/form-data" style="margin-top:18px;">
+                @csrf
+                <label class="field-label">Metode Pembayaran</label>
+                <select name="metode_pembayaran" class="field-select payment-method" data-proof-target="user-proof-{{ $pengembalian->id }}" required>
+                    <option value="">Pilih metode pembayaran</option>
+                    <option value="tunai">Tunai</option>
+                    <option value="transfer">Transfer Rekening</option>
+                </select>
+
+                <div class="stack-item" style="margin-top:16px; background:var(--brand-soft); border-color:#d3dcea;">
+                    <strong>Total Tagihan</strong>
+                    <div style="font-size:28px; margin-top:8px; color:var(--danger);">Rp {{ number_format($pengembalian->denda, 0, ',', '.') }}</div>
+                    <small>BCA 1234567890 a.n. Perpustakaan Digital</small>
+                </div>
+
+                <div id="user-proof-{{ $pengembalian->id }}" style="display:none; margin-top:16px;">
+                    <label class="field-label">Bukti Pembayaran</label>
+                    <input type="file" name="bukti_pembayaran" accept="image/*" class="field-input">
+                    <small>Wajib jika memilih transfer rekening.</small>
+                </div>
+
+                <div class="action-row" style="justify-content:flex-end;">
+                    <button type="button" class="btn-secondary" data-close-modal>Batal</button>
+                    <button type="submit" class="btn-primary">Kirim</button>
+                </div>
+            </form>
         </div>
-    @else
-        <div class="empty-state">
-            <div class="empty-state-icon">✓</div>
-            <div class="empty-state-text">Tidak ada denda. Selamat!</div>
-            <p style="color: #047857; margin-top: 8px; font-size: 0.95rem;">
-                Anda telah melunasi semua denda perpustakaan.
-            </p>
-        </div>
-    @endif
+    </div>
+@endforeach
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-open-payment]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const modal = document.getElementById(button.dataset.target);
+                if (modal) modal.classList.add('show');
+            });
+        });
+
+        document.querySelectorAll('[data-close-modal]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const modal = button.closest('.modal-backdrop');
+                if (modal) modal.classList.remove('show');
+            });
+        });
+
+        document.querySelectorAll('.modal-backdrop').forEach(function (modal) {
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) modal.classList.remove('show');
+            });
+        });
+
+        document.querySelectorAll('.payment-method').forEach(function (select) {
+            const target = document.getElementById(select.dataset.proofTarget);
+            const toggle = function () {
+                if (!target) return;
+                target.style.display = select.value === 'transfer' ? 'block' : 'none';
+                const input = target.querySelector('input[type="file"]');
+                if (input) input.required = select.value === 'transfer';
+            };
+            select.addEventListener('change', toggle);
+            toggle();
+        });
+    });
+</script>
 @endsection
