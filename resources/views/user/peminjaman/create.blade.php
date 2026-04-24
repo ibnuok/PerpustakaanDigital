@@ -2,7 +2,7 @@
 
 @section('title', 'Ajukan Peminjaman')
 @section('page_heading', 'Ajukan Peminjaman Buku')
-@section('page_description', 'Lengkapi tanggal dan jumlah peminjaman agar admin bisa memproses pengajuan Anda dengan cepat.')
+@section('page_description', 'Lengkapi tanggal dan waktu peminjaman agar admin bisa memproses dengan cepat.')
 
 @section('page_actions')
     <a href="{{ route('user.bukus') }}" class="btn-secondary">Kembali ke Katalog</a>
@@ -25,13 +25,27 @@
                     <label class="field-label" for="jumlah">Jumlah</label>
                     <input id="jumlah" type="number" name="jumlah" value="{{ old('jumlah', 1) }}" min="1" max="{{ $buku->stok }}" class="field-input" required>
                 </div>
+
+                {{-- TANGGAL & JAM PINJAM --}}
                 <div>
                     <label class="field-label" for="tanggal_pinjam">Tanggal Pinjam</label>
                     <input id="tanggal_pinjam" type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', now()->toDateString()) }}" class="field-input" required>
                 </div>
-                <div class="md:col-span-2">
+
+                <div>
+                    <label class="field-label" for="jam_pinjam">Jam Pinjam (HH:MM)</label>
+                    <input id="jam_pinjam" type="time" name="jam_pinjam" value="{{ old('jam_pinjam', now()->format('H:i')) }}" class="field-input" required>
+                </div>
+
+                {{-- TANGGAL & JAM KEMBALI --}}
+                <div>
                     <label class="field-label" for="tanggal_kembali">Tanggal Kembali</label>
                     <input id="tanggal_kembali" type="date" name="tanggal_kembali" value="{{ old('tanggal_kembali') }}" class="field-input" required>
+                </div>
+
+                <div>
+                    <label class="field-label" for="jam_kembali">Jam Kembali (HH:MM)</label>
+                    <input id="jam_kembali" type="time" name="jam_kembali" value="{{ old('jam_kembali', now()->format('H:i')) }}" class="field-input" required>
                 </div>
             </div>
 
@@ -48,4 +62,25 @@
             </div>
         </aside>
     </form>
+
+    <script>
+        // Auto-set jam_kembali same as jam_pinjam when jam_pinjam changes
+        document.getElementById('jam_pinjam').addEventListener('change', function() {
+            const jamKembaliInput = document.getElementById('jam_kembali');
+            if (!jamKembaliInput.value) {
+                jamKembaliInput.value = this.value;
+            }
+        });
+
+        // Validasi tanggal kembali >= tanggal pinjam
+        document.getElementById('tanggal_kembali').addEventListener('change', function() {
+            const tglPinjam = new Date(document.getElementById('tanggal_pinjam').value);
+            const tglKembali = new Date(this.value);
+
+            if (tglKembali < tglPinjam) {
+                alert('Tanggal kembali harus lebih besar dari tanggal pinjam');
+                this.value = '';
+            }
+        });
+    </script>
 @endsection

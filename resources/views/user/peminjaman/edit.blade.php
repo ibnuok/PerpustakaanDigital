@@ -25,13 +25,25 @@
                     <label class="field-label" for="jumlah">Jumlah</label>
                     <input id="jumlah" type="number" name="jumlah" value="{{ old('jumlah', $peminjaman->jumlah) }}" min="1" class="field-input" required>
                 </div>
+
                 <div>
                     <label class="field-label" for="tanggal_pinjam">Tanggal Pinjam</label>
                     <input id="tanggal_pinjam" type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', $peminjaman->tanggal_pinjam->toDateString()) }}" class="field-input" required>
                 </div>
-                <div class="md:col-span-2">
+
+                <div>
+                    <label class="field-label" for="jam_pinjam">Jam Pinjam (HH:MM)</label>
+                    <input id="jam_pinjam" type="time" name="jam_pinjam" value="{{ old('jam_pinjam', $peminjaman->tanggal_pinjam->format('H:i')) }}" class="field-input" required>
+                </div>
+
+                <div>
                     <label class="field-label" for="tanggal_kembali">Tanggal Kembali</label>
                     <input id="tanggal_kembali" type="date" name="tanggal_kembali" value="{{ old('tanggal_kembali', $peminjaman->tanggal_kembali->toDateString()) }}" class="field-input" required>
+                </div>
+
+                <div>
+                    <label class="field-label" for="jam_kembali">Jam Kembali (HH:MM)</label>
+                    <input id="jam_kembali" type="time" name="jam_kembali" value="{{ old('jam_kembali', $peminjaman->tanggal_kembali->format('H:i')) }}" class="field-input" required>
                 </div>
             </div>
 

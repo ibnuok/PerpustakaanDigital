@@ -82,7 +82,9 @@ class UserPeminjamanController extends Controller
             'buku_id' => 'required|exists:bukus,id',
             'jumlah' => 'required|integer|min:1',
             'tanggal_pinjam' => 'required|date|after_or_equal:today',
+            'jam_pinjam' => 'required|date_format:H:i',
             'tanggal_kembali' => 'required|date|after:tanggal_pinjam',
+            'jam_kembali' => 'required|date_format:H:i',
         ]);
 
         $buku = Buku::findOrFail($validated['buku_id']);
@@ -90,12 +92,16 @@ class UserPeminjamanController extends Controller
             return back()->withErrors(['jumlah' => 'Stok buku tidak mencukupi! Stok tersedia: ' . $buku->stok . ' unit.'])->withInput();
         }
 
+        // Combine date + time
+        $tanggal_pinjam = $validated['tanggal_pinjam'] . ' ' . $validated['jam_pinjam'];
+        $tanggal_kembali = $validated['tanggal_kembali'] . ' ' . $validated['jam_kembali'];
+
         Peminjaman::create([
             'user_id' => auth()->id(),
             'buku_id' => $validated['buku_id'],
             'jumlah' => $validated['jumlah'],
-            'tanggal_pinjam' => $validated['tanggal_pinjam'],
-            'tanggal_kembali' => $validated['tanggal_kembali'],
+            'tanggal_pinjam' => $tanggal_pinjam,
+            'tanggal_kembali' => $tanggal_kembali,
             'status' => 'pending',
         ]);
 
@@ -126,7 +132,9 @@ class UserPeminjamanController extends Controller
         $validated = $request->validate([
             'jumlah' => 'required|integer|min:1',
             'tanggal_pinjam' => 'required|date|after_or_equal:today',
+            'jam_pinjam' => 'required|date_format:H:i',
             'tanggal_kembali' => 'required|date|after:tanggal_pinjam',
+            'jam_kembali' => 'required|date_format:H:i',
         ]);
 
         if ((int) $validated['jumlah'] > $peminjaman->buku->stok) {
@@ -135,7 +143,15 @@ class UserPeminjamanController extends Controller
             ])->withInput();
         }
 
-        $peminjaman->update($validated);
+        // Combine date + time
+        $tanggal_pinjam = $validated['tanggal_pinjam'] . ' ' . $validated['jam_pinjam'];
+        $tanggal_kembali = $validated['tanggal_kembali'] . ' ' . $validated['jam_kembali'];
+
+        $peminjaman->update([
+            'jumlah' => $validated['jumlah'],
+            'tanggal_pinjam' => $tanggal_pinjam,
+            'tanggal_kembali' => $tanggal_kembali,
+        ]);
 
         return redirect()->route('user.peminjaman.index')->with('success', 'Pengajuan peminjaman berhasil diperbarui.');
     }

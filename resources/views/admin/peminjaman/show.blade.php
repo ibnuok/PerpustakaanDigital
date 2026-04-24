@@ -15,7 +15,7 @@
     <div class="detail-card">
         <span class="badge-soft">Informasi Transaksi</span>
         <div class="detail-grid mt-5">
-            <div class="detail-row">
+            <div class="detail-row">    
                 <span class="detail-label">Peminjam</span>
                 <span class="detail-value">{{ $peminjaman->user->name }}</span>
                 <span class="detail-subvalue">{{ $peminjaman->user->email }}</span>
